@@ -46,7 +46,47 @@ jobs:
           persist-credentials: false
 
       - name: Submodules
-        run: git submodule update --init --recursive --depth 1
+        run: |
+          git submodule update --init --recursive --depth 1 -- \
+            external/lsplant \
+            external/dobby \
+            external/fmt \
+            external/xz-embedded \
+            external/lsplt \
+            external/apache/commons-lang \
+            external/axml/manifest-editor
+
+      # github.com/libxposed has been taken down, so cloning services/libxposed and xposed/libxposed
+      # -- the two submodules left out above -- fails. The same sources are published to Maven
+      # Central, and that is where they come from now. Each `-sources.jar` holds exactly what the
+      # build reaches for, laid out from `io/` down:
+      #
+      #   api       -> xposed/libxposed/api/src/main/java      (xposed/build.gradle.kts)
+      #   service   -> services/libxposed/service/src/main/... (services/daemon-service)
+      #   interface -> the AIDL-generated stubs IXposedService and friends. They land beside the
+      #               service sources rather than in the `aidl` directory, because what Maven ships
+      #               is generated Java: there is no .aidl left to run through aidl. The daemon
+      #               service only adds `service/src/main` to its Java source directories, and
+      #               Gradle walks a source directory recursively, so both sets are picked up.
+      #
+      # 102.0.0 is the release matching this branch's libxposed API level.
+      - name: Restore libxposed from Maven Central
+        run: |
+          set -euo pipefail
+          fetch() {
+            local module="$1" dest="$2"
+            curl -fsSL -o "/tmp/$module.jar" \
+              "https://repo1.maven.org/maven2/io/github/libxposed/$module/102.0.0/$module-102.0.0-sources.jar"
+            rm -rf "/tmp/$module"
+            unzip -q -o "/tmp/$module.jar" -d "/tmp/$module" -x 'META-INF/*'
+            mkdir -p "$dest/io"
+            cp -r "/tmp/$module/io/." "$dest/io/"
+          }
+          fetch api       "$GITHUB_WORKSPACE/xposed/libxposed/api/src/main/java"
+          fetch service   "$GITHUB_WORKSPACE/services/libxposed/service/src/main/java"
+          fetch interface "$GITHUB_WORKSPACE/services/libxposed/service/src/main/java"
+          find "$GITHUB_WORKSPACE/xposed/libxposed" "$GITHUB_WORKSPACE/services/libxposed" \
+            -name '*.java' | sort
 
       # Before anything is built, because it needs nothing but Python and a translator's mistake
       # should not wait twenty minutes to surface. Crowdin owns the content of these files, so what
