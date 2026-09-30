@@ -1,0 +1,48 @@
+name: Probe libxposed layout
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Download and inspect sources jars
+        run: |
+          set -u
+          mkdir -p /tmp/j && cd /tmp/j
+          for m in api service interface; do
+            for v in 102.0.0; do
+              url="https://repo1.maven.org/maven2/io/github/libxposed/$m/$v/$m-$v-sources.jar"
+              echo "=== $m-$v ===" >> /tmp/report.txt
+              code=$(curl -sSL -o "$m.jar" -w '%{http_code}' "$url")
+              echo "http=$code size=$(stat -c%s "$m.jar" 2>/dev/null || echo 0)" >> /tmp/report.txt
+              if [ "$code" = "200" ]; then
+                unzip -l "$m.jar" | head -60 >> /tmp/report.txt
+              fi
+            done
+          done
+
+      - name: Submodule gitlinks
+        run: |
+          echo "=== git submodule status ===" >> /tmp/report.txt
+          git submodule status >> /tmp/report.txt 2>&1
+          echo "=== .gitmodules ===" >> /tmp/report.txt
+          cat .gitmodules >> /tmp/report.txt
+
+      - name: Publish report
+        run: |
+          cp /tmp/report.txt libxposed-layout.txt
+          git config user.name "ci-probe"
+          git config user.email "ci-probe@example.invalid"
+          git checkout -B ci-probe
+          git add -f libxposed-layout.txt
+          git commit -m "probe: libxposed sources layout" || echo "nothing"
+          git push -f origin ci-probe
