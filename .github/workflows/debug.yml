@@ -1,0 +1,33 @@
+name: Debug checkout
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout without submodules
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Probe every submodule upstream
+        run: |
+          set +e
+          echo "=== gitmodules ==="
+          cat .gitmodules
+          echo "=== submodule status ==="
+          git submodule status
+          echo
+          for u in $(git config -f .gitmodules --get-regexp 'submodule\..*\.url' | awk '{print $2}'); do
+            echo "--- probing $u"
+            timeout 60 git ls-remote "$u" HEAD 2>&1 | head -3
+            echo "    rc=$?"
+          done
+
+      - name: Try recursive submodule update
+        run: |
+          set +e
+          git submodule update --init --recursive 2>&1 | tail -60
+          echo "submodule update rc=${PIPESTATUS[0]}"
