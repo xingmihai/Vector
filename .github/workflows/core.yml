@@ -40,6 +40,12 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+          # On a fork the job token is scoped to this repository alone. Checkout writes it into
+          # http.extraheader, and `git submodule update` then offers it to the upstreams the
+          # submodules live in -- which answer 403, because the token is not valid there. Leaving
+          # no credential behind lets the recursive fetch fall back to anonymous, which these
+          # public upstreams accept.
+          persist-credentials: false
 
       # Before anything is built, because it needs nothing but Python and a translator's mistake
       # should not wait twenty minutes to surface. Crowdin owns the content of these files, so what
