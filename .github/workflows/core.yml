@@ -35,17 +35,18 @@ jobs:
       CCACHE_BASEDIR: "${{ github.workspace }}"
 
     steps:
+      # Two steps rather than `submodules: recursive`, because on a fork that fails outright:
+      # Checkout fetches submodules with the job token, and every upstream here answers 403 to it,
+      # the token being scoped to this repository alone. Fetching them here, after the checkout has
+      # dropped its credential, reaches them anonymously -- which these public upstreams accept.
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          submodules: recursive
           fetch-depth: 0
-          # On a fork the job token is scoped to this repository alone. Checkout writes it into
-          # http.extraheader, and `git submodule update` then offers it to the upstreams the
-          # submodules live in -- which answer 403, because the token is not valid there. Leaving
-          # no credential behind lets the recursive fetch fall back to anonymous, which these
-          # public upstreams accept.
           persist-credentials: false
+
+      - name: Submodules
+        run: git submodule update --init --recursive --depth 1
 
       # Before anything is built, because it needs nothing but Python and a translator's mistake
       # should not wait twenty minutes to surface. Crowdin owns the content of these files, so what
