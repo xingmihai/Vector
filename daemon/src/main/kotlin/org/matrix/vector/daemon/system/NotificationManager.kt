@@ -75,7 +75,7 @@ object NotificationManager {
             NotificationChannel(
                     STATUS_CHANNEL_ID,
                     context.getString(R.string.status_channel_name),
-                    android.app.NotificationManager.IMPORTANCE_MIN)
+                    android.app.NotificationManager.IMPORTANCE_HIGH)
                 .apply { setShowBadge(false) },
             NotificationChannel(
                     UPDATED_CHANNEL_ID,
