@@ -467,4 +467,8 @@
     <string name="launcher_prompt_body">Vector працює всередині чужого процесу, а не встановлений, тому в лаунчері нічого не з\'являється і очевидного шляху назад немає. Додайте ярлик на головний екран або встановіть Vector як звичайний застосунок.</string>
     <string name="launcher_prompt_never">Більше не питати</string>
     <string name="update_reload">Оновити</string>
+    <string name="settings_nav_bar_mode">NavigationBar Mode</string>
+    <string name="settings_floating_bar">Use FloatingNavigationBar</string>
+    <string name="settings_floating_bar_style">FloatingNavigationBar Style</string>
+    <string name="settings_floating_bar_position">FloatingNavigationBar Position</string>
 </resources>
