@@ -169,6 +169,10 @@
     <string name="scope_pending">%1$d por añadir, %2$d por quitar</string>
     <string name="scope_apply">Aplicar</string>
     <string name="scope_discard">Descartar</string>
+    <string name="scope_unsaved_title">Unapplied changes</string>
+    <string name="scope_unsaved_message">This scope has been changed but not applied yet, and leaving now throws those changes away.</string>
+    <string name="scope_unsaved_save">Apply and leave</string>
+    <string name="scope_unsaved_leave">Leave without applying</string>
     <string name="scope_applied">Ámbito aplicado.</string>
     <string name="scope_apply_failed">El framework rechazó el nuevo ámbito.</string>
     <string name="scope_toggle_failed">El framework rechazó ese cambio.</string>
