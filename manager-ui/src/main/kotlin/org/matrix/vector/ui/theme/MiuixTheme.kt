@@ -1,8 +1,7 @@
 package org.matrix.vector.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -33,8 +32,15 @@ fun MiuixVectorTheme(
     mode: ThemeMode = ThemeMode.System,
     seed: Color? = null,
     amoled: Boolean = false,
-    typography: Typography = Typography(),
-    content: @Composable () -> Unit,
+    /**
+     * Given the Material colours Miuix produced, draw the tree.
+     *
+     * The colours are handed over rather than applied, because which Material theme wraps the
+     * app is the host's call: the manager wants the expressive one, whose motion scheme is what
+     * makes a state change feel caused rather than scheduled. A bridge that picked for them
+     * would quietly drop that.
+     */
+    content: @Composable (ColorScheme) -> Unit,
 ) {
     val dark = when (mode) {
         ThemeMode.System -> isSystemInDarkTheme()
@@ -141,7 +147,5 @@ fun MiuixVectorTheme(
             base
         }
 
-    MiuixTheme(controller = controller) {
-        MaterialTheme(colorScheme = materialColors, typography = typography, content = content)
-    }
+    MiuixTheme(controller = controller) { content(materialColors) }
 }
