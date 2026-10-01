@@ -10,28 +10,32 @@ jobs:
   export:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout dist branch
+      - name: Checkout master
         uses: actions/checkout@v7
         with:
-          ref: dist
           fetch-depth: 0
-        continue-on-error: true
 
       - name: Download release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p out
-          TAG=$(curl -sSL -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/releases?per_page=1" \
-            | grep -o '"tag_name":"[^"]*"' | head -1 | cut -d'"' -f4)
-          echo "tag=$TAG"
-          NAME=$(curl -sSL -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" \
-            | grep -o '"name":"[^"]*Release.zip"' | head -1 | cut -d'"' -f4)
-          echo "asset=$NAME"
-          curl -sSL -o out/Vector-Release.zip \
-            "https://github.com/${{ github.repository }}/releases/download/$TAG/$NAME"
+          ID=$(curl -sSL -H "Authorization: token $GH_TOKEN" \
+               -H "Accept: application/vnd.github+json" \
+               "https://api.github.com/repos/${{ github.repository }}/releases?per_page=1" \
+             | python3 -c "
+          import json,sys
+          r=json.load(sys.stdin)[0]
+          print([a['id'] for a in r['assets'] if 'Release' in a['name']][0])
+          ")
+          echo "asset id=$ID"
+          curl -sSL -H "Authorization: token $GH_TOKEN" \
+               -H "Accept: application/octet-stream" \
+               -o out/Vector-Release.zip \
+               "https://api.github.com/repos/${{ github.repository }}/releases/assets/$ID"
           ls -la out/
+          file out/Vector-Release.zip
           sha256sum out/Vector-Release.zip | tee out/sha256.txt
 
       - name: Split into text chunks
