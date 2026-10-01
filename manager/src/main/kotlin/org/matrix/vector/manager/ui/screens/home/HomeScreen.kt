@@ -683,14 +683,14 @@ private fun ActivityPreviewCard(
                 ) {
                     ContributorAvatar(
                         login = entry.commit.authorLogin,
-                        avatarUrl = entry.commit.avatarUrl,
+                        avatarUrl = entry.commit.authors.firstOrNull()?.avatarUrl,
                         size = 20.dp,
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         // The subject, not the hash: a hash is a reference for someone who already
                         // knows the commit, and this row is for someone deciding whether to look.
-                        text = entry.commit.message,
+                        text = entry.commit.subject,
                         style = MaterialTheme.typography.bodySmall,
                         color = MiuixTheme.colorScheme.onSurface,
                         maxLines = 1,
