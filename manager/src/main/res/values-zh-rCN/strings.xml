@@ -163,6 +163,10 @@
     <string name="scope_pending">将新增 %1$d 项，移除 %2$d 项</string>
     <string name="scope_apply">应用</string>
     <string name="scope_discard">放弃</string>
+    <string name="scope_unsaved_title">未应用的更改</string>
+    <string name="scope_unsaved_message">此作用域已修改但尚未应用，现在离开会丢弃这些更改。</string>
+    <string name="scope_unsaved_save">应用并离开</string>
+    <string name="scope_unsaved_leave">不应用直接离开</string>
     <string name="scope_applied">作用域已应用。</string>
     <string name="scope_apply_failed">框架拒绝了新的作用域。</string>
     <string name="scope_toggle_failed">框架拒绝了此次更改。</string>
