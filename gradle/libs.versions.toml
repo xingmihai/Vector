@@ -14,6 +14,9 @@ nav3 = "1.1.6"
 navigationevent = "1.1.2"
 # Governs every androidx.compose.* artifact below; none of them pin a version.
 compose-bom = "2026.08.00"
+# Miuix: a HyperOS-flavoured component library. Published per-platform, so the
+# Android coordinates carry an -android suffix rather than the plain KMP ones.
+miuix = "0.9.4"
 
 [plugins]
 agp-lib = { id = "com.android.library", version.ref = "agp" }
@@ -44,6 +47,14 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "m3" }
 androidx-compose-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "m3" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+
+# Miuix. Every artifact is built against the JetBrains Compose Multiplatform
+# foundation; on Android those coordinates resolve onto androidx anyway, so this sits
+# beside the BOM rather than replacing it.
+miuix-ui = { group = "top.yukonga.miuix.kmp", name = "miuix-ui-android", version.ref = "miuix" }
+miuix-preference = { group = "top.yukonga.miuix.kmp", name = "miuix-preference-android", version.ref = "miuix" }
+miuix-icons = { group = "top.yukonga.miuix.kmp", name = "miuix-icons-android", version.ref = "miuix" }
+miuix-squircle = { group = "top.yukonga.miuix.kmp", name = "miuix-squircle-android", version.ref = "miuix" }
 
 # Navigation 3. Stable since Nov 2025; the back stack is a plain observable list
 # of NavKey objects rather than route strings.
