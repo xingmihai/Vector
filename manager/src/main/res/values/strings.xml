@@ -468,4 +468,5 @@
     <string name="launcher_prompt_title">Vector has no icon yet</string>
     <string name="launcher_prompt_body">Vector runs inside another process rather than being installed, so nothing appears in your launcher and there is no obvious way back in. Give it a home screen shortcut, or install it as an ordinary app.</string>
     <string name="launcher_prompt_never">Don\'t ask again</string>
+    <string name="update_reload">Refresh</string>
 </resources>
