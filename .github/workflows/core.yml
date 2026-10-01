@@ -170,7 +170,38 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          ./gradlew zipAll
+          set -o pipefail
+          ./gradlew zipAll 2>&1 | tee build.log
+
+      - name: Save the interesting part of the build log
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          python3 - <<'EOF' > excerpt.txt
+          import re
+          try:
+              t = open('build.log', errors='replace').read()
+          except FileNotFoundError:
+              print('no build.log'); raise SystemExit
+          hits = []
+          for m in re.finditer(r'^[ \t]*(\* )?What went wrong:.*$', t, re.M):
+              hits.append(t[m.start():m.start() + 3000])
+          if not hits:
+              hits = [t[-4000:]]
+          print('\n=====\n'.join(hits)[-12000:])
+          EOF
+          wc -c excerpt.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin diag 2>/dev/null || true
+          git checkout -B diag
+          mkdir -p diag
+          cp excerpt.txt diag/excerpt.txt
+          git add diag/excerpt.txt
+          git commit -m "diag: build log excerpt for run ${{ github.run_id }}" || exit 0
+          git push -f origin diag
 
       - name: Prepare artifact
         if: success()
