@@ -957,8 +957,10 @@ class GitHubRepository(
          */
         private const val ZIP_PREFIX = "Vector-"
 
-        /** CI keeps five; a few extra are fetched so a stable release among them costs nothing. */
-        private const val CANARY_FETCH = 12
+        /**
+         * CI keeps twenty; a few extra are fetched so a stable release among them costs nothing.
+         */
+        private const val CANARY_FETCH = 30
 
         /**
          * How many canaries CI keeps, which the canary screen states as reassurance.
@@ -966,7 +968,7 @@ class GitHubRepository(
          * Read from here rather than written into the sentence, so the promise the screen makes
          * and the number the workflow prunes to cannot drift apart silently.
          */
-        const val CANARY_KEEP = 5
+        const val CANARY_KEEP = 20
 
         /**
          * Every GitHub call is made through this proxy, not straight at GitHub.
