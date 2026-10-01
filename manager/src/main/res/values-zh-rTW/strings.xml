@@ -415,4 +415,8 @@
     <string name="launcher_prompt_body">Vector 執行在別的程序裡，而不是被安裝到系統中，所以啟動器上看不到它，也沒有明顯的途徑再開啟它。給它一個主畫面捷徑，或者把它安裝成一般的應用程式。</string>
     <string name="launcher_prompt_never">不再詢問</string>
     <string name="update_reload">重新整理</string>
+    <string name="settings_nav_bar_mode">導覽列模式</string>
+    <string name="settings_floating_bar">使用懸浮導覽列</string>
+    <string name="settings_floating_bar_style">懸浮導覽列樣式</string>
+    <string name="settings_floating_bar_position">懸浮導覽列位置</string>
 </resources>
