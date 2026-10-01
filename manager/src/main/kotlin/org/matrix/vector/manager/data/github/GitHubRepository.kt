@@ -924,7 +924,13 @@ class GitHubRepository(
             .getOrDefault(0L)
 
     companion object {
-        const val OWNER = "JingMatrix"
+        // Named after whoever publishes this build rather than after upstream. The update screen
+        // reads /repos/{REPO}/releases, so a build published from this fork would otherwise offer
+        // upstream's canaries — and installing one of those would overwrite everything this fork
+        // changes. Pointing them here keeps the offer and the build the same thing, and takes the
+        // links (issues, discussions, canary runs) along with it, which is where a reader of a
+        // fork's build should be sent anyway.
+        const val OWNER = "xingmihai"
         const val REPO = "$OWNER/Vector"
         const val REPO_URL = "https://github.com/$REPO"
         const val ISSUES_URL = "$REPO_URL/issues"
