@@ -22,9 +22,10 @@ jobs:
         run: |
           set -uo pipefail
           mkdir -p out
-          ./gradlew :manager:compileDebugKotlin --stacktrace > out/log.txt 2>&1 || true
-          tail -c 18000 out/log.txt > out/tail.txt
-          wc -c out/log.txt
+          ./gradlew :manager:compileDebugKotlin > out/log.txt 2>&1 || true
+          grep -E "^e:|error:|warning: .*unresolved" out/log.txt > out/err.txt || true
+          wc -l out/err.txt
+          head -c 12000 out/err.txt > out/tail.txt
       - name: Push log
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
