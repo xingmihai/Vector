@@ -131,6 +131,11 @@ object NotificationManager {
             .setContentIntent(pi)
             .setVisibility(Notification.VISIBILITY_SECRET)
             .setOngoing(true)
+            // This notice is posted again on every daemon start, and the channel now sits at
+            // IMPORTANCE_HIGH so that it is actually visible. Without this, each of those
+            // reposts would ring and peek again: the notice is an ongoing status line, not an
+            // event, so it should alert the once when it appears and then stay quiet.
+            .setOnlyAlertOnce(true)
             .build()
             .apply { extras.putString("android.substName", BuildConfig.FRAMEWORK_NAME) }
 
