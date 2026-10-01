@@ -22,10 +22,11 @@ jobs:
         run: |
           set -uo pipefail
           mkdir -p out
+          git rev-parse --short HEAD > out/head.txt
           ./gradlew :manager:compileDebugKotlin > out/log.txt 2>&1 || true
           grep -E "^e:" out/log.txt > out/err.txt || true
-          head -c 14000 out/err.txt > out/tail.txt
-          wc -l out/err.txt
+          cat out/head.txt out/err.txt > out/tail.txt
+          head -c 14000 out/tail.txt > out/tail.txt.tmp && mv out/tail.txt.tmp out/tail.txt
       - name: Push log
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
