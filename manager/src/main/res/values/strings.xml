@@ -262,6 +262,10 @@
     <string name="scope_apply_effect">Each app picks this up the next time it starts.</string>
     <string name="scope_apply">Apply</string>
     <string name="scope_discard">Discard</string>
+    <string name="scope_unsaved_title">Unapplied changes</string>
+    <string name="scope_unsaved_message">This scope has been changed but not applied yet, and leaving now throws those changes away.</string>
+    <string name="scope_unsaved_save">Apply and leave</string>
+    <string name="scope_unsaved_leave">Leave without applying</string>
     <string name="scope_applied">Scope applied.</string>
     <string name="scope_apply_failed">The framework refused the new scope.</string>
     <string name="scope_toggle_failed">The framework refused that change.</string>
