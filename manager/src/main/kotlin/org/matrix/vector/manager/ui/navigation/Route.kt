@@ -48,6 +48,16 @@ sealed interface TopLevelRoute : Route {
 
 @Serializable data class StoreDetail(val packageName: String) : Route
 
+/**
+ * The activity feed, on a screen of its own.
+ *
+ * It used to be the lower half of Home, which put an open-ended rail — six months can be a
+ * hundred rows — after everything short and actionable, so anything below it was unreachable
+ * without a long scroll. It was also the only part of Home that needed the network, so offline
+ * the page ended in a blank.
+ */
+@Serializable data object Activity : Route
+
 @Serializable data object SystemStatus : Route
 
 /**
