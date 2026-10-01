@@ -44,6 +44,7 @@ import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.SystemUpdateAlt
 import androidx.compose.material3.Button
@@ -109,6 +110,7 @@ fun FrameworkUpdateScreen(
     val selected by viewModel.selected.collectAsStateWithLifecycle()
     val history by viewModel.history.collectAsStateWithLifecycle()
     val direction by viewModel.direction.collectAsStateWithLifecycle()
+    val reloading by viewModel.reloading.collectAsStateWithLifecycle()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var versionsOpen by remember { mutableStateOf(false) }
     // The screen is about whichever release is selected, which defaults to the update when there
@@ -158,6 +160,24 @@ fun FrameworkUpdateScreen(
                     }
                 },
                 actions = {
+                    // First in the row: the version list this screen is about is a cached
+                    // answer, and the reader who was told "no update" wants to ask again
+                    // rather than be sent out and back to ask. Disabled while one is in
+                    // flight, which is also the only feedback it needs — the spinner is the
+                    // answer arriving, and a second press would be a no-op anyway.
+                    IconButton(onClick = viewModel::reload, enabled = !reloading) {
+                        if (reloading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Icon(
+                                Icons.Rounded.Refresh,
+                                contentDescription = stringResource(R.string.update_reload),
+                            )
+                        }
+                    }
                     if (history.size > 1) {
                         IconButton(onClick = { versionsOpen = true }) {
                             Icon(
