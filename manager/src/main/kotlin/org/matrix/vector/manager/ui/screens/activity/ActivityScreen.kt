@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -80,7 +81,7 @@ fun ActivityScreen(
                 },
             )
         },
-    ) { insets ->
+    ) { insets: PaddingValues ->
         PullToRefreshBox(
             isRefreshing = refreshing,
             onRefresh = { viewModel.refreshFeed(GitHubRepository.Freshness.Force) },
