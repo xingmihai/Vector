@@ -425,4 +425,8 @@
     <string name="launcher_prompt_body">Vector به‌جای آنکه نصب شده باشد درون فرایندی دیگر اجرا می‌شود، پس چیزی در لانچر پیدا نمی‌شود و راه روشنی برای بازگشت به آن نیست. به آن میان‌بری در صفحهٔ اصلی بدهید، یا آن را مانند برنامه‌ای معمولی نصب کنید.</string>
     <string name="launcher_prompt_never">دیگر پرسیده نشود</string>
     <string name="update_reload">به‌روزرسانی</string>
+    <string name="settings_nav_bar_mode">NavigationBar Mode</string>
+    <string name="settings_floating_bar">Use FloatingNavigationBar</string>
+    <string name="settings_floating_bar_style">FloatingNavigationBar Style</string>
+    <string name="settings_floating_bar_position">FloatingNavigationBar Position</string>
 </resources>
