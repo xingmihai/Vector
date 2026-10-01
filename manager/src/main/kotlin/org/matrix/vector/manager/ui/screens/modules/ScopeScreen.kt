@@ -12,6 +12,10 @@ import androidx.compose.material.icons.rounded.SettingsBackupRestore
 import androidx.compose.material.icons.rounded.SaveAlt
 import androidx.compose.material.icons.rounded.SwapVert
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetState
@@ -198,6 +202,11 @@ fun ScopeScreen(
         }
     val haptics = LocalHapticFeedback.current
     var confirmStranded by remember { mutableStateOf(false) }
+    var confirmUnsaved by remember { mutableStateOf(false) }
+    // Set when "apply and leave" is chosen, so the leaving waits for the write that was just
+    // started. Navigating straight away would drop the reader back on the module list before the
+    // framework had answered, and a refusal would then have nowhere to be reported.
+    var leaveAfterApply by remember { mutableStateOf(false) }
     // Whether the stranding question has already been put this visit, and answered by neither
     // button. Two slots cannot hold three answers, so when the module has asked for something the
     // buttons are "give it that" and "switch it off" and there is none that says "leave it exactly
@@ -236,6 +245,13 @@ fun ScopeScreen(
         }
     }
 
+    // The write runs in the view model, so it outlives this composable but not the navigation
+    // entry: it is still in flight when the dialog closes. Waiting for it to finish is what lets
+    // the answer — applied, or refused — reach the snackbar on this screen before it goes.
+    LaunchedEffect(applying) {
+        if (leaveAfterApply && !applying) onNavigateBack()
+    }
+
     // The view model is scoped to the navigation entry, so it survives leaving the app entirely,
     // and nothing else re-reads the scope after `init`. Without this the screen would go on showing
     // what the table held when it opened. See `refreshSavedScope` for who else writes it.
@@ -246,8 +262,15 @@ fun ScopeScreen(
 
     // Leaving a module enabled with nothing to hook does nothing at all but looks like it works.
     fun attemptBack() {
-        if (!strandWarned && viewModel.wouldStrandModule()) confirmStranded = true
-        else onNavigateBack()
+        when {
+            !strandWarned && viewModel.wouldStrandModule() -> confirmStranded = true
+            // Ticked boxes are the only record of an edit until `apply` runs, and nothing on this
+            // screen says so loudly enough: the ticks stay put after the page is closed, so it
+            // looks saved. Back is how this screen is usually left, so it is where the draft has
+            // to be caught.
+            pending.any -> confirmUnsaved = true
+            else -> onNavigateBack()
+        }
     }
 
     // The gesture leaves this screen exactly as the arrow does, so it asks the same question
@@ -583,6 +606,40 @@ fun ScopeScreen(
             },
         )
     }
+
+    if (confirmUnsaved) {
+        // Three answers again, and the same two slots, so cancelling is once the only way to say
+        // "keep editing". Unlike the stranding question this one is asked every time: the draft it
+        // is about can be added to after a first refusal, so remembering the answer would let a
+        // later, different edit leave silently.
+        SharedAlertDialog(
+            onDismissRequest = { confirmUnsaved = false },
+            title = { Text(stringResource(R.string.scope_unsaved_title)) },
+            text = { Text(stringResource(R.string.scope_unsaved_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmUnsaved = false
+                        leaveAfterApply = true
+                        viewModel.apply()
+                    }
+                ) {
+                    Text(stringResource(R.string.scope_unsaved_save))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        confirmUnsaved = false
+                        viewModel.discard()
+                        onNavigateBack()
+                    }
+                ) {
+                    Text(stringResource(R.string.scope_unsaved_leave))
+                }
+            },
+        )
+    }
 }
 
 /**
@@ -593,6 +650,7 @@ fun ScopeScreen(
  * every second row wraps and the menu reads as a paragraph. A sheet has the full width, and it can
  * carry the leading icons that tell an action from a setting.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScopeSelectMenu(
     hasRecommended: Boolean,
@@ -605,12 +663,21 @@ private fun ScopeSelectMenu(
     onRestore: () -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
-    IconButton(onClick = { open = true }) {
-        Icon(
-            Icons.Rounded.Checklist,
-            contentDescription = stringResource(R.string.scope_select),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+    // Three icons sit in the search field's trailing slot, and an icon alone does not say which
+    // of them is which. The label is on the sheet each one opens, but that is after the tap --
+    // a long press says what a button is before committing to it.
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(stringResource(R.string.scope_select)) } },
+        state = rememberTooltipState(),
+    ) {
+        IconButton(onClick = { open = true }) {
+            Icon(
+                Icons.Rounded.Checklist,
+                contentDescription = stringResource(R.string.scope_select),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
     if (open) {
         ScopeSheet(
@@ -688,6 +755,7 @@ private fun ScopeSelectMenu(
  * Chips rather than rows: these are short, all of one kind, and several are on at once — which a
  * column of ticks states less clearly than a row of filled chips.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScopeFilterMenu(
     showSystem: Boolean,
@@ -718,18 +786,24 @@ private fun ScopeFilterMenu(
     // Under a static scope the list is already exactly the module's own fixed set, so there is
     // nothing to filter. The control stays present but visibly dead, and says why when pressed —
     // removing it entirely would just raise the same question silently.
-    IconButton(onClick = { if (locked) onLockedClick() else open = true }) {
-        BadgedBox(badge = { if (filtering) Badge(modifier = Modifier.size(6.dp)) }) {
-            Icon(
-                Icons.Rounded.FilterList,
-                contentDescription = stringResource(R.string.modules_filter),
-                tint =
-                    when {
-                        locked -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
-                        filtering -> MaterialTheme.colorScheme.primary
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-            )
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(stringResource(R.string.modules_filter)) } },
+        state = rememberTooltipState(),
+    ) {
+        IconButton(onClick = { if (locked) onLockedClick() else open = true }) {
+            BadgedBox(badge = { if (filtering) Badge(modifier = Modifier.size(6.dp)) }) {
+                Icon(
+                    Icons.Rounded.FilterList,
+                    contentDescription = stringResource(R.string.modules_filter),
+                    tint =
+                        when {
+                            locked -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+                            filtering -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                )
+            }
         }
     }
     if (open) {
@@ -781,6 +855,7 @@ private fun ScopeFilterMenu(
 }
 
 /** What order it is in: every [ScopeSort], and a reverse toggle over whichever is chosen. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScopeSortMenu(
     sort: ScopeSort,
@@ -789,14 +864,20 @@ private fun ScopeSortMenu(
     onReverse: () -> Unit,
 ) {
     var open by remember { mutableStateOf(false) }
-    IconButton(onClick = { open = true }) {
-        Icon(
-            Icons.AutoMirrored.Rounded.Sort,
-            contentDescription = stringResource(R.string.scope_sort),
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(stringResource(R.string.scope_sort)) } },
+        state = rememberTooltipState(),
+    ) {
+        IconButton(onClick = { open = true }) {
+            Icon(
+                Icons.AutoMirrored.Rounded.Sort,
+                contentDescription = stringResource(R.string.scope_sort),
             tint =
                 if (sort != ScopeSort.Relevance || reversed) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+            )
+        }
     }
     if (open) {
         ScopeSheet(
