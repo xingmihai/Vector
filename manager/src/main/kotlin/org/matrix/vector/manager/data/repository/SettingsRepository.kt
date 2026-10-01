@@ -104,9 +104,6 @@ class SettingsRepository(context: Context) : StoreSettings, NetworkSettings {
      * word wrap, header surface, activity window — and the reason it applies it is that the host
      * process is killed constantly, so anything held in a ViewModel is gone by the next visit.
      *
-     * "Recommended only" is deliberately absent. It narrows the list to what one module asked for,
-     * and a module that asks for nothing would then open to an empty screen — a filter that reads
-     * as breakage. It stays per visit.
      */
     private val _scopeShowSystemApps = MutableStateFlow(prefs.getBoolean("scope_system_apps", false))
     val scopeShowSystemApps: StateFlow<Boolean> = _scopeShowSystemApps.asStateFlow()
@@ -130,6 +127,23 @@ class SettingsRepository(context: Context) : StoreSettings, NetworkSettings {
     fun setScopeShowModules(show: Boolean) {
         prefs.edit().putBoolean("scope_modules", show).apply()
         _scopeShowModules.value = show
+    }
+
+    /**
+     * Whether one module's scope list is narrowed to what that module asked for.
+     *
+     * Keyed by package rather than kept in a single flag, and that is the only reason it can be
+     * kept at all. One shared flag would be read by every module — including the many that declare
+     * no scope, for which "requested only" matches nothing. A choice made on one module would then
+     * open another to a list that looks broken, with no control on screen to turn it back off,
+     * because the control is only shown when there is a scope to narrow to. Per package, a module
+     * reads back only what was chosen on it.
+     */
+    fun scopeRecommendedOnly(modulePackageName: String): Boolean =
+        prefs.getBoolean("scope_recommended_only_$modulePackageName", false)
+
+    fun setScopeRecommendedOnly(modulePackageName: String, only: Boolean) {
+        prefs.edit().putBoolean("scope_recommended_only_$modulePackageName", only).apply()
     }
 
     private val _scopeSort = MutableStateFlow(prefs.getString("scope_sort", "relevance") ?: "relevance")
