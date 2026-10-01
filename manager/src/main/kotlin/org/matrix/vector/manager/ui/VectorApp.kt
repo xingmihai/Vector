@@ -2,6 +2,9 @@ package org.matrix.vector.manager.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -13,6 +16,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -55,6 +59,10 @@ import org.matrix.vector.manager.ui.screens.web.forWebView
 import org.matrix.vector.ui.logs.LogTraceScreen
 import org.matrix.vector.ui.logs.LogsScreen
 import org.matrix.vector.ui.navigation.FloatingPanelNav
+import org.matrix.vector.ui.navigation.PanelEditDone
+import org.matrix.vector.ui.navigation.PanelNavigationBar
+import org.matrix.vector.ui.navigation.PanelNavigationRail
+import org.matrix.vector.ui.navigation.isHorizontal
 import org.matrix.vector.ui.navigation.LocalNavigator
 import org.matrix.vector.ui.navigation.Navigator
 import org.matrix.vector.ui.navigation.PanelBar
@@ -62,6 +70,8 @@ import org.matrix.vector.ui.navigation.PanelEditDone
 import org.matrix.vector.ui.navigation.rememberNavigator
 import org.matrix.vector.ui.store.RepoDetailsScreen
 import org.matrix.vector.ui.store.RepoScreen
+import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationRail
 
 /**
  * The app shell.
@@ -112,44 +122,20 @@ fun VectorApp() {
         // the current destination, and a navigation bar highlighting nothing is worse than none.
         val atRoot = !navigator.canGoBack
 
-        // Driving the scaffold's own state rather than dropping the items: hiding the items alone
-        // leaves the container laid out, so a detail screen — the in-app browser especially —
-        // keeps a dead strip of navigation-bar-sized space at the bottom.
-        val suiteState = rememberNavigationSuiteScaffoldState()
-        LaunchedEffect(atRoot) { if (atRoot) suiteState.show() else suiteState.hide() }
+        // Which axis the container runs along is still the suite's answer — it is the one that
+        // knows the window — but the container is Miuix's now, so the type only decides whether a
+        // bar goes under the content or a rail beside it.
+        val horizontal =
+            isHorizontal(
+                NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
+            )
+        // Present at the root of a panel, where one of its items is the current destination; on a
+        // detail screen a container highlighting nothing is worse than none. The floating style has
+        // no container at all — except while rearranging, when there would be nothing to rearrange.
+        val showContainer = atRoot && (!floating || editing)
 
-        // Computed rather than left to the scaffold's default, for two reasons: the floating style
-        // forces None, which is what actually removes the container instead of hiding it, and
-        // PanelBar has to be told which axis it is laying items along. Entering edit mode overrules
-        // the floating setting for as long as it lasts — there is nothing to rearrange otherwise.
-        val suiteType =
-            if (floating && !editing) NavigationSuiteType.None
-            else NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
-
-        NavigationSuiteScaffold(
-            navigationItems = {
-                // NavigationSuite's `when` over the type has no None branch and no else, so under
-                // None this slot is silently dropped along with the container. Skipping it here
-                // says so out loud rather than leaving a composable that never runs.
-                if (suiteType != NavigationSuiteType.None) {
-                    PanelBar(
-                        panels = navigator.panels,
-                        current = navigator.currentTopLevel,
-                        editing = editing,
-                        suiteType = suiteType,
-                        onSelect = { route -> navigator.switchTo(route) },
-                        onEdit = { navigator.editingPanels = true },
-                        onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
-                        onMove = { from, to -> navigator.movePanel(from, to) },
-                    )
-                }
-            },
-            navigationSuiteType = suiteType,
-            state = suiteState,
-            primaryActionContent = {
-                if (editing) PanelEditDone(onDone = { navigator.editingPanels = false })
-            },
-        ) {
+        // The destinations, and the ball that replaces the container when there is none.
+        val content: @Composable () -> Unit = {
             Box(Modifier.fillMaxSize()) {
                 NavDisplay(
                     backStack = navigator.backStack,
@@ -181,6 +167,54 @@ fun VectorApp() {
                         settings = VectorFloatingNavSettings,
                     )
                 }
+            }
+        }
+
+        if (horizontal) {
+            Column(Modifier.fillMaxSize()) {
+                Box(Modifier.weight(1f)) { content() }
+                if (showContainer) {
+                    if (editing) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            PanelEditDone(onDone = { navigator.editingPanels = false })
+                        }
+                    }
+                    NavigationBar {
+                        PanelNavigationBar(
+                            panels = navigator.panels,
+                            current = navigator.currentTopLevel,
+                            editing = editing,
+                            onSelect = { route -> navigator.switchTo(route) },
+                            onEdit = { navigator.editingPanels = true },
+                            onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
+                            onMove = { from, to -> navigator.movePanel(from, to) },
+                        )
+                    }
+                }
+            }
+        } else {
+            Row(Modifier.fillMaxSize()) {
+                if (showContainer) {
+                    NavigationRail(
+                        header = {
+                            if (editing) PanelEditDone(onDone = { navigator.editingPanels = false })
+                        },
+                    ) {
+                        PanelNavigationRail(
+                            panels = navigator.panels,
+                            current = navigator.currentTopLevel,
+                            editing = editing,
+                            onSelect = { route -> navigator.switchTo(route) },
+                            onEdit = { navigator.editingPanels = true },
+                            onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
+                            onMove = { from, to -> navigator.movePanel(from, to) },
+                        )
+                    }
+                }
+                Box(Modifier.weight(1f)) { content() }
             }
         }
 
