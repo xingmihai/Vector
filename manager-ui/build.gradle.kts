@@ -40,4 +40,10 @@ dependencies {
     api(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.webkit)
+
+    // Miuix, for the HyperOS-flavoured components the manager is being moved onto.
+    implementation(libs.miuix.ui)
+    implementation(libs.miuix.preference)
+    implementation(libs.miuix.icons)
+    implementation(libs.miuix.squircle)
 }
