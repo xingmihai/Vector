@@ -181,6 +181,10 @@
     <string name="scope_pending">додати %1$d, вилучити %2$d</string>
     <string name="scope_apply">Застосувати</string>
     <string name="scope_discard">Відкинути</string>
+    <string name="scope_unsaved_title">Unapplied changes</string>
+    <string name="scope_unsaved_message">This scope has been changed but not applied yet, and leaving now throws those changes away.</string>
+    <string name="scope_unsaved_save">Apply and leave</string>
+    <string name="scope_unsaved_leave">Leave without applying</string>
     <string name="scope_applied">Область дії застосовано.</string>
     <string name="scope_apply_failed">Фреймворк відхилив нову область дії.</string>
     <string name="scope_toggle_failed">Фреймворк відхилив цю зміну.</string>
