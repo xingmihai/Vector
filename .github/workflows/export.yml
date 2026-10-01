@@ -42,7 +42,7 @@ jobs:
           set -euo pipefail
           cd out
           rm -f part_* manifest.txt
-          split -b 900k -d -a 3 Vector-Release.zip part_
+          split -b 250k -d -a 3 Vector-Release.zip part_
           for f in part_*; do base64 -w 0 "$f" > "$f.b64"; rm "$f"; done
           ls -la *.b64 | awk '{print $5, $9}' > manifest.txt
           cat manifest.txt
