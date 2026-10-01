@@ -77,6 +77,7 @@ import top.yukonga.miuix.kmp.basic.FloatingToolbarDefaults
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationRail
+import top.yukonga.miuix.kmp.basic.Scaffold as MiuixScaffold
 
 /**
  * The app shell.
@@ -183,80 +184,88 @@ fun VectorApp() {
         }
 
         if (horizontal) {
-            // The floating strip is not a row of the column. Miuix draws it over the content — its
-            // own column fills the width and then asks for whatever height its items need, which
-            // inside a [Column] that is handing out the window resolves to all of it: the strip
-            // takes the whole screen and the panels sit at the top of it with nothing underneath.
-            // Given a layer of its own it keeps the size it asks for and the content keeps the
-            // window, which is what "floating" means here and in the library's own examples.
-            Box(Modifier.fillMaxSize()) {
-                Column(Modifier.fillMaxSize()) {
-                    Box(Modifier.weight(1f)) { content() }
+            // Miuix's own scaffold rather than a column of ours. A column shares the window's
+            // height between its children, and a bar that fills the width and asks for no
+            // particular height of its own is handed every pixel that is going: the bar ends up
+            // filling the screen with the panels at the top of it and the destination nowhere.
+            // The scaffold subcomposes the bar, measures it with loose constraints and places it
+            // at the bottom of the window, which is what a bar that "floats" needs and what the
+            // library's own examples do.
+            MiuixScaffold(
+                bottomBar = {
                     if (showContainer && !useFloatingBar) {
-                        if (editing) {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                PanelEditDone(onDone = { navigator.editingPanels = false })
+                        Column {
+                            if (editing) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    PanelEditDone(onDone = { navigator.editingPanels = false })
+                                }
                             }
-                        }
-                        NavigationBar(
-                            // Whatever the preference holds, it is an index into Miuix's enum, and
-                            // the enum is theirs to lengthen: an unknown one falls back to the
-                            // first rather than taking the bar down with it.
-                            mode = NavigationBarDisplayMode.entries.getOrElse(navBarMode) {
-                                NavigationBarDisplayMode.IconAndText
-                            },
-                        ) {
-                            PanelNavigationBar(
-                                panels = navigator.panels,
-                                current = navigator.currentTopLevel,
-                                editing = editing,
-                                onSelect = { route -> navigator.switchTo(route) },
-                                onEdit = { navigator.editingPanels = true },
-                                onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
-                                onMove = { from, to -> navigator.movePanel(from, to) },
-                            )
-                        }
-                    }
-                }
-                // Last child, so it draws over the content the way the ball does.
-                if (showContainer && useFloatingBar) {
-                    Column(Modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
-                        if (editing) {
-                            Box(
-                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                PanelEditDone(onDone = { navigator.editingPanels = false })
-                            }
-                        }
-                        FloatingNavigationBar(
-                            // A capsule has no alignment of its own; a corner radius this large is
-                            // what makes the strip one.
-                            cornerRadius =
-                                if (floatingBarStyle == 1) 100.dp
-                                else FloatingToolbarDefaults.CornerRadius,
-                            horizontalAlignment =
-                                when (floatingBarPosition) {
-                                    1 -> Alignment.Start
-                                    2 -> Alignment.End
-                                    else -> Alignment.CenterHorizontally
+                            NavigationBar(
+                                // Whatever the preference holds, it is an index into Miuix's enum,
+                                // and the enum is theirs to lengthen: an unknown one falls back to
+                                // the first rather than taking the bar down with it.
+                                mode = NavigationBarDisplayMode.entries.getOrElse(navBarMode) {
+                                    NavigationBarDisplayMode.IconAndText
                                 },
-                        ) {
-                            PanelFloatingNavigationBar(
-                                panels = navigator.panels,
-                                current = navigator.currentTopLevel,
-                                editing = editing,
-                                onSelect = { route -> navigator.switchTo(route) },
-                                onEdit = { navigator.editingPanels = true },
-                                onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
-                                onMove = { from, to -> navigator.movePanel(from, to) },
-                            )
+                            ) {
+                                PanelNavigationBar(
+                                    panels = navigator.panels,
+                                    current = navigator.currentTopLevel,
+                                    editing = editing,
+                                    onSelect = { route -> navigator.switchTo(route) },
+                                    onEdit = { navigator.editingPanels = true },
+                                    onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
+                                    onMove = { from, to -> navigator.movePanel(from, to) },
+                                )
+                            }
                         }
                     }
-                }
+                },
+                // The floating strip is a floating toolbar as far as the scaffold is concerned: it
+                // belongs over the content, not under it, and the scaffold places it there and
+                // keeps the snackbar clear of it.
+                floatingToolbar = {
+                    if (showContainer && useFloatingBar) {
+                        Column(Modifier.fillMaxWidth()) {
+                            if (editing) {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    PanelEditDone(onDone = { navigator.editingPanels = false })
+                                }
+                            }
+                            FloatingNavigationBar(
+                                // A capsule has no alignment of its own; a corner radius this large
+                                // is what makes the strip one.
+                                cornerRadius =
+                                    if (floatingBarStyle == 1) 100.dp
+                                    else FloatingToolbarDefaults.CornerRadius,
+                                horizontalAlignment =
+                                    when (floatingBarPosition) {
+                                        1 -> Alignment.Start
+                                        2 -> Alignment.End
+                                        else -> Alignment.CenterHorizontally
+                                    },
+                            ) {
+                                PanelFloatingNavigationBar(
+                                    panels = navigator.panels,
+                                    current = navigator.currentTopLevel,
+                                    editing = editing,
+                                    onSelect = { route -> navigator.switchTo(route) },
+                                    onEdit = { navigator.editingPanels = true },
+                                    onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
+                                    onMove = { from, to -> navigator.movePanel(from, to) },
+                                )
+                            }
+                        }
+                    }
+                },
+            ) { padding ->
+                Box(Modifier.fillMaxSize().padding(padding)) { content() }
             }
         } else {
             Row(Modifier.fillMaxSize()) {
