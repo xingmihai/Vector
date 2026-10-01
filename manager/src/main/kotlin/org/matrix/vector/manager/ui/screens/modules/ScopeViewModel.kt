@@ -164,8 +164,12 @@ class ScopeViewModel(
      * filter on this screen does. Dropping every app the module had not named would hide a stray
      * selection and leave it un-untickable, and would narrow the list to nothing for a module that
      * declares no scope at all.
+     *
+     * Remembered per module, like the other filters on this screen, and written back as it changes
+     * rather than on the way out. See [SettingsRepository.scopeRecommendedOnly] for why the key
+     * carries the package name.
      */
-    val showRecommendedOnly = MutableStateFlow(false)
+    val showRecommendedOnly = MutableStateFlow(settings.scopeRecommendedOnly(modulePackageName))
 
     /**
      * Whether other Xposed modules appear in the list.
@@ -208,6 +212,9 @@ class ScopeViewModel(
         }
         viewModelScope.launch { showGames.collect { settings.setScopeShowGames(it) } }
         viewModelScope.launch { showModules.collect { settings.setScopeShowModules(it) } }
+        viewModelScope.launch {
+            showRecommendedOnly.collect { settings.setScopeRecommendedOnly(modulePackageName, it) }
+        }
         viewModelScope.launch { sort.collect { settings.setScopeSort(it.name.lowercase()) } }
         viewModelScope.launch { reverseSort.collect { settings.setScopeSortReversed(it) } }
     }
