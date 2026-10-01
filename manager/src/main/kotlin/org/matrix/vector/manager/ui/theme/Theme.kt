@@ -2,6 +2,7 @@ package org.matrix.vector.manager.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import org.matrix.vector.ui.theme.MiuixVectorTheme
 import org.matrix.vector.ui.theme.SeedScheme
 import org.matrix.vector.ui.theme.ThemeMode
 import org.matrix.vector.ui.theme.toAmoled
@@ -36,19 +37,30 @@ fun VectorTheme(content: @Composable () -> Unit) {
     // the user would rather choose the colour themselves than inherit their wallpaper's.
     val dynamic = dynamicRequested && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
-    var scheme =
-        when {
-            dynamic && dark -> dynamicDarkColorScheme(context)
-            dynamic -> dynamicLightColorScheme(context)
-            else -> remember(seed, dark) { SeedScheme.of(seed, dark) }
+    // Miuix supplies the palette; Material is derived from it, so screens already written pick
+    // the colours up untouched and ones being rewritten can use Miuix components beside them.
+    MiuixVectorTheme(
+        mode = ThemeMode.from(modeKey),
+        // A chosen seed overrides the wallpaper. Null when the reader asked for dynamic colour
+        // and the platform can supply it: Miuix then reads the wallpaper itself.
+        seed = if (dynamic && seed == null) null else seed,
+        amoled = amoled,
+    ) { scheme ->
+        var colors = scheme
+        // Dynamic and seedless is the one combination Miuix resolves against the wallpaper, so
+        // the platform's own scheme is the closer answer there.
+        if (dynamic && seed == null) {
+            colors =
+                if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-    if (dark && amoled) scheme = scheme.toAmoled()
+        if (dark && amoled) colors = colors.toAmoled()
 
-    MaterialExpressiveTheme(
-        colorScheme = scheme,
-        // The expressive motion scheme is what makes a state change feel caused rather than
-        // scheduled. It drives the status indicator's shape morph and the nav transitions.
-        motionScheme = MotionScheme.expressive(),
-        content = content,
-    )
+        MaterialExpressiveTheme(
+            colorScheme = colors,
+            // The expressive motion scheme is what makes a state change feel caused rather than
+            // scheduled. It drives the status indicator's shape morph and the nav transitions.
+            motionScheme = MotionScheme.expressive(),
+            content = content,
+        )
+    }
 }
