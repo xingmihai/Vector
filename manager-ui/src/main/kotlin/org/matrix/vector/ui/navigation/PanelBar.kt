@@ -60,6 +60,7 @@ import androidx.compose.ui.zIndex
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import org.matrix.vector.ui.R
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
 
@@ -178,6 +179,53 @@ fun ColumnScope.PanelNavigationRail(
 }
 
 /**
+ * The panels, as the items of a Miuix [FloatingNavigationBar].
+ *
+ * The same arrangement again, floating over the bottom of the window: the slots carry no weight —
+ * the strip sizes itself to the items — so [fillSlot] is off and each item is its own size.
+ */
+@Composable
+fun PanelFloatingNavigationBar(
+    panels: NavPanels,
+    current: androidx.navigation3.runtime.NavKey,
+    editing: Boolean,
+    onSelect: (androidx.navigation3.runtime.NavKey) -> Unit,
+    onEdit: () -> Unit,
+    onToggleHidden: (key: String, hidden: Boolean) -> Unit,
+    onMove: (from: Int, to: Int) -> Unit,
+) {
+    val items = if (editing) panels.all else panels.visible
+    val drag = remember(items.size, true) { PanelDrag(items.size) }
+
+    items.forEachIndexed { index, destination ->
+        PanelSlot(
+            destination = destination,
+            index = index,
+            count = items.size,
+            selected = destination.route == current,
+            editing = editing,
+            hidden = panels.isHidden(destination),
+            canHide = panels.canHide(destination),
+            horizontal = true,
+            drag = drag,
+            onSelect = { onSelect(destination.route) },
+            onEdit = onEdit,
+            onToggleHidden = { hidden -> onToggleHidden(destination.key, hidden) },
+            onMove = onMove,
+            fillSlot = false,
+        ) { label, selected, onClick, modifier ->
+            FloatingNavigationBarItem(
+                selected = selected,
+                onClick = onClick,
+                icon = if (selected) destination.selectedIcon else destination.icon,
+                label = label,
+                modifier = modifier,
+            )
+        }
+    }
+}
+
+/**
  * The way out of edit mode that is not the back gesture.
  *
  * A FloatingActionButton because that is what reads as the way out rather than as one more
@@ -235,6 +283,7 @@ private fun PanelSlot(
     onToggleHidden: (Boolean) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
     slotModifier: Modifier = Modifier,
+    fillSlot: Boolean = horizontal,
     content: @Composable (label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier) -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -354,9 +403,10 @@ private fun PanelSlot(
             }
         val itemModifier =
             // The bar hands its slot a fixed size; filling it back up keeps the whole slot tappable
-            // rather than only the icon and label in the middle of it. The rail measures loosely
-            // and gets no such modifier — filling there would stretch one item down the rail.
-            (if (horizontal) Modifier.fillMaxSize() else Modifier)
+            // rather than only the icon and label in the middle of it. The rail and the floating
+            // bar measure loosely and get no such modifier — filling there would stretch one item
+            // down the whole rail, or one floating item across the whole strip.
+            (if (fillSlot) Modifier.fillMaxSize() else Modifier)
                 .graphicsLayer { alpha = if (hidden) HIDDEN_ALPHA else 1f }
                 .then(itemSemantics)
         // Nothing to select while rearranging: a tap in edit mode is either the badge or the start
