@@ -183,18 +183,55 @@ fun VectorApp() {
         }
 
         if (horizontal) {
-            Column(Modifier.fillMaxSize()) {
-                Box(Modifier.weight(1f)) { content() }
-                if (showContainer) {
-                    if (editing) {
-                        Box(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                            contentAlignment = Alignment.Center,
+            // The floating strip is not a row of the column. Miuix draws it over the content — its
+            // own column fills the width and then asks for whatever height its items need, which
+            // inside a [Column] that is handing out the window resolves to all of it: the strip
+            // takes the whole screen and the panels sit at the top of it with nothing underneath.
+            // Given a layer of its own it keeps the size it asks for and the content keeps the
+            // window, which is what "floating" means here and in the library's own examples.
+            Box(Modifier.fillMaxSize()) {
+                Column(Modifier.fillMaxSize()) {
+                    Box(Modifier.weight(1f)) { content() }
+                    if (showContainer && !useFloatingBar) {
+                        if (editing) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                PanelEditDone(onDone = { navigator.editingPanels = false })
+                            }
+                        }
+                        NavigationBar(
+                            // Whatever the preference holds, it is an index into Miuix's enum, and
+                            // the enum is theirs to lengthen: an unknown one falls back to the
+                            // first rather than taking the bar down with it.
+                            mode = NavigationBarDisplayMode.entries.getOrElse(navBarMode) {
+                                NavigationBarDisplayMode.IconAndText
+                            },
                         ) {
-                            PanelEditDone(onDone = { navigator.editingPanels = false })
+                            PanelNavigationBar(
+                                panels = navigator.panels,
+                                current = navigator.currentTopLevel,
+                                editing = editing,
+                                onSelect = { route -> navigator.switchTo(route) },
+                                onEdit = { navigator.editingPanels = true },
+                                onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
+                                onMove = { from, to -> navigator.movePanel(from, to) },
+                            )
                         }
                     }
-                    if (useFloatingBar) {
+                }
+                // Last child, so it draws over the content the way the ball does.
+                if (showContainer && useFloatingBar) {
+                    Column(Modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
+                        if (editing) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                PanelEditDone(onDone = { navigator.editingPanels = false })
+                            }
+                        }
                         FloatingNavigationBar(
                             // A capsule has no alignment of its own; a corner radius this large is
                             // what makes the strip one.
@@ -209,25 +246,6 @@ fun VectorApp() {
                                 },
                         ) {
                             PanelFloatingNavigationBar(
-                                panels = navigator.panels,
-                                current = navigator.currentTopLevel,
-                                editing = editing,
-                                onSelect = { route -> navigator.switchTo(route) },
-                                onEdit = { navigator.editingPanels = true },
-                                onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
-                                onMove = { from, to -> navigator.movePanel(from, to) },
-                            )
-                        }
-                    } else {
-                        NavigationBar(
-                            // Whatever the preference holds, it is an index into Miuix's enum, and
-                            // the enum is theirs to lengthen: an unknown one falls back to the
-                            // first rather than taking the bar down with it.
-                            mode = NavigationBarDisplayMode.entries.getOrElse(navBarMode) {
-                                NavigationBarDisplayMode.IconAndText
-                            },
-                        ) {
-                            PanelNavigationBar(
                                 panels = navigator.panels,
                                 current = navigator.currentTopLevel,
                                 editing = editing,
