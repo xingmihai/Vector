@@ -34,6 +34,7 @@ import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.OpenInBrowser
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Reorder
+import androidx.compose.material.icons.rounded.RoundedCorner
 import androidx.compose.material.icons.rounded.Waves
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -101,6 +102,15 @@ import org.matrix.vector.ui.R as UiR
  * place.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+/** The three item shapes Miuix's bar can draw, named as the library names them. */
+private val NavBarModeOptions = listOf("IconAndText", "IconOnly", "IconWithSelectedLabel")
+
+/** The two looks Miuix's floating bar takes. */
+private val FloatingBarStyleOptions = listOf("Default", "iOS-like")
+
+/** Where the floating bar can sit along the bottom. */
+private val FloatingBarPositionOptions = listOf("Center", "Start", "End")
+
 @Composable
 fun HomeAppearanceSheet(onDismiss: () -> Unit) {
     val settings = ServiceLocator.settings
@@ -114,6 +124,10 @@ fun HomeAppearanceSheet(onDismiss: () -> Unit) {
     val seed by settings.seedColor.collectAsStateWithLifecycle()
     val ambience by settings.headerAmbience.collectAsStateWithLifecycle()
     val floating by settings.floatingNav.collectAsStateWithLifecycle()
+    val navBarMode by settings.navBarMode.collectAsStateWithLifecycle()
+    val useFloatingBar by settings.useFloatingBar.collectAsStateWithLifecycle()
+    val floatingBarStyle by settings.floatingBarStyle.collectAsStateWithLifecycle()
+    val floatingBarPosition by settings.floatingBarPosition.collectAsStateWithLifecycle()
     val contributorOrder by settings.contributorOrder.collectAsStateWithLifecycle()
     val resolvedDark =
         when (ThemeMode.from(themeMode)) {
@@ -215,12 +229,57 @@ LocalizedOverlay {
 
             SheetHeading(stringResource(R.string.settings_navigation), Icons.Rounded.Dashboard)
             ToggleRow(
-                title = stringResource(R.string.settings_floating_nav),
-                icon = Icons.Rounded.BubbleChart,
-                subtitle = stringResource(R.string.settings_floating_nav_summary),
-                checked = floating,
-                onCheckedChange = settings::setFloatingNav,
+                title = stringResource(R.string.settings_floating_bar),
+                icon = Icons.Rounded.RoundedCorner,
+                checked = useFloatingBar,
+                onCheckedChange = settings::setUseFloatingBar,
             )
+            if (useFloatingBar) {
+                ChoiceRow {
+                    FloatingBarStyleOptions.forEachIndexed { index, name ->
+                        FilterChip(
+                            selected = floatingBarStyle == index,
+                            onClick = { settings.setFloatingBarStyle(index) },
+                            label = { Text(name) },
+                        )
+                    }
+                }
+                // The capsule is centred by its shape, so an alignment beside it would be an
+                // alignment that does nothing.
+                if (floatingBarStyle == 0) {
+                    ChoiceRow {
+                        FloatingBarPositionOptions.forEachIndexed { index, name ->
+                            FilterChip(
+                                selected = floatingBarPosition == index,
+                                onClick = { settings.setFloatingBarPosition(index) },
+                                label = { Text(name) },
+                            )
+                        }
+                    }
+                }
+            } else {
+                ChoiceRow {
+                    NavBarModeOptions.forEachIndexed { index, name ->
+                        FilterChip(
+                            selected = navBarMode == index,
+                            onClick = { settings.setNavBarMode(index) },
+                            label = { Text(name) },
+                        )
+                    }
+                }
+            }
+            // Two ways of not having a bar, and only one of them can be in force: with the strip
+            // floating, the ball is not what the panels are in, so offering both would let the
+            // reader turn one on and wonder where the other went.
+            if (!useFloatingBar) {
+                ToggleRow(
+                    title = stringResource(R.string.settings_floating_nav),
+                    icon = Icons.Rounded.BubbleChart,
+                    subtitle = stringResource(R.string.settings_floating_nav_summary),
+                    checked = floating,
+                    onCheckedChange = settings::setFloatingNav,
+                )
+            }
             SheetAction(
                 title = stringResource(UiR.string.settings_rearrange_panels),
                 icon = Icons.Rounded.Reorder,
