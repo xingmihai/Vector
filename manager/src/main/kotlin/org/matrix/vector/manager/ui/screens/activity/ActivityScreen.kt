@@ -80,11 +80,11 @@ fun ActivityScreen(
                 },
             )
         },
-    ) { padding ->
+    ) { insets ->
         PullToRefreshBox(
             isRefreshing = refreshing,
             onRefresh = { viewModel.refreshFeed(GitHubRepository.Freshness.Force) },
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier.fillMaxSize().padding(insets),
         ) {
             LazyColumn(
                 state = listState,
