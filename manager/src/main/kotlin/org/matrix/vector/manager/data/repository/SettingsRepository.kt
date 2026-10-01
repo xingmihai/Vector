@@ -482,6 +482,63 @@ class SettingsRepository(context: Context) : StoreSettings, NetworkSettings {
     }
 
     /**
+     * Which of Miuix's three item shapes the bottom bar draws: icon and label, icon alone, or icon
+     * with the label fading in on the selected item.
+     *
+     * An index rather than the library's enum: the enum is Miuix's to change, and an ordinal of
+     * somebody else's type names a different mode the day they add one. The reader's choice is
+     * turned back into the enum at the bar, where an unknown index falls back to the first.
+     */
+    private val _navBarMode = MutableStateFlow(prefs.getInt("nav_bar_mode", 0))
+    val navBarMode: StateFlow<Int> = _navBarMode.asStateFlow()
+
+    fun setNavBarMode(index: Int) {
+        prefs.edit().putInt("nav_bar_mode", index).apply()
+        _navBarMode.value = index
+    }
+
+    /**
+     * Whether the bottom bar is Miuix's floating one — a rounded strip floating over the bottom of
+     * the window instead of a bar under the content.
+     *
+     * Not the same thing as [floatingNav], which puts the panels in a draggable ball with no
+     * container at all. This keeps them where a bar puts them and only lifts the bar off the
+     * bottom edge, so the two are alternatives and the ball's switch is hidden while this is on.
+     */
+    private val _useFloatingBar = MutableStateFlow(prefs.getBoolean("use_floating_bar", false))
+    val useFloatingBar: StateFlow<Boolean> = _useFloatingBar.asStateFlow()
+
+    fun setUseFloatingBar(enabled: Boolean) {
+        prefs.edit().putBoolean("use_floating_bar", enabled).apply()
+        _useFloatingBar.value = enabled
+    }
+
+    /**
+     * Which of the two looks the floating bar takes: Miuix's own rounded rectangle, or a full
+     * capsule in the manner of iOS.
+     *
+     * An index for the same reason [navBarMode] is one. The capsule has no horizontal alignment of
+     * its own — a capsule is centred or it is not a capsule — so the position below is offered
+     * only for the first.
+     */
+    private val _floatingBarStyle = MutableStateFlow(prefs.getInt("floating_bar_style", 0))
+    val floatingBarStyle: StateFlow<Int> = _floatingBarStyle.asStateFlow()
+
+    fun setFloatingBarStyle(index: Int) {
+        prefs.edit().putInt("floating_bar_style", index).apply()
+        _floatingBarStyle.value = index
+    }
+
+    /** Where the floating bar sits along the bottom: centred, or pushed to one side. */
+    private val _floatingBarPosition = MutableStateFlow(prefs.getInt("floating_bar_position", 0))
+    val floatingBarPosition: StateFlow<Int> = _floatingBarPosition.asStateFlow()
+
+    fun setFloatingBarPosition(index: Int) {
+        prefs.edit().putInt("floating_bar_position", index).apply()
+        _floatingBarPosition.value = index
+    }
+
+    /**
      * Where the floating ball was left: which side it snapped to, and how far down it sits as a
      * fraction of the window height.
      *
