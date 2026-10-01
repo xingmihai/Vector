@@ -361,9 +361,9 @@ jobs:
           zip=$(gh release view "$tag" --json assets \
             --jq '[.assets[] | select(.name | test("Release\\.zip$"))][0].url' || true)
           [ -n "$zip" ] || { echo "no release zip on $tag"; exit 1; }
-          python3 - "$zip" <<'PYEOF'
+          python3 - "$zip" "$tag" <<'PYEOF'
           import json, sys
-          url = sys.argv[1]
+          url, tag = sys.argv[1], sys.argv[2]
           name = url.rsplit('/', 1)[-1]
           stem = name[:-len('-Release.zip')]
           code = stem.rsplit('-', 1)[-1]
@@ -371,7 +371,11 @@ jobs:
               {
                   "version": stem.rsplit('-', 1)[0],
                   "versionCode": int(code),
-                  "zipUrl": "https://github.com/xingmihai/Vector/releases/download/canary-%s/%s" % (code.split('-')[-1], name),
+                  # Take the tag this build published rather than rebuilding it from the
+                  # zip's name: the two disagree whenever the version code carries a hyphen
+                  # (vcanary-3117-3159 gives 3159, but the tag is canary-3117), and the
+                  # wrong tag is a link that 404s and an update that is never offered.
+                  "zipUrl": "https://github.com/xingmihai/Vector/releases/download/%s/%s" % (tag, name),
                   "changelog": "https://raw.githubusercontent.com/xingmihai/Vector/master/zygisk/changelog.md",
               },
               open('zygisk/update.json', 'w'),
