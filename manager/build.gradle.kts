@@ -160,6 +160,11 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
+    // Miuix, for the components the screens are moving onto. The shared layer depends on it
+    // too, but screens live in this module, so it has to be named here as well.
+    implementation(libs.miuix.ui)
+    implementation(libs.miuix.icons)
+
     // Tooling dependencies, debug builds only, for UI previews.
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
