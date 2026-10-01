@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import org.matrix.vector.manager.di.ServiceLocator
 
@@ -32,6 +33,11 @@ fun VectorTheme(content: @Composable () -> Unit) {
             ThemeMode.Dark -> true
         }
 
+    // A colour preference is stored as an ARGB int, which is what the picker hands back and
+    // what the seed scheme takes. Miuix wants a Color, so the conversion happens once here
+    // rather than at the setting.
+    val seedColor = remember(seed) { seed?.let { Color(it) } }
+
     val context = LocalContext.current
     // Dynamic colour is this app's default; the seed below applies before Android 12, or whenever
     // the user would rather choose the colour themselves than inherit their wallpaper's.
@@ -43,13 +49,13 @@ fun VectorTheme(content: @Composable () -> Unit) {
         mode = ThemeMode.from(modeKey),
         // A chosen seed overrides the wallpaper. Null when the reader asked for dynamic colour
         // and the platform can supply it: Miuix then reads the wallpaper itself.
-        seed = if (dynamic && seed == null) null else seed,
+        seed = seedColor,
         amoled = amoled,
     ) { scheme ->
         var colors = scheme
         // Dynamic and seedless is the one combination Miuix resolves against the wallpaper, so
         // the platform's own scheme is the closer answer there.
-        if (dynamic && seed == null) {
+        if (dynamic && seedColor == null) {
             colors =
                 if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
