@@ -1,6 +1,6 @@
 {
-	"version": "vcanary-3117",
-	"versionCode": 3159,
-	"zipUrl": "https://github.com/xingmihai/Vector/releases/download/canary-3117/Vector-vcanary-3117-3159-Release.zip",
+	"version": "v1.0",
+	"versionCode": 3163,
+	"zipUrl": "https://github.com/xingmihai/Vector/releases/download/canary-3117/Vector-v1.0-3163-Release.zip",
 	"changelog": "https://raw.githubusercontent.com/xingmihai/Vector/master/zygisk/changelog.md"
 }
