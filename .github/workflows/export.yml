@@ -1,0 +1,55 @@
+name: Export release zip to branch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout dist branch
+        uses: actions/checkout@v7
+        with:
+          ref: dist
+          fetch-depth: 0
+        continue-on-error: true
+
+      - name: Download release asset
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          TAG=$(curl -sSL -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases?per_page=1" \
+            | grep -o '"tag_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+          echo "tag=$TAG"
+          NAME=$(curl -sSL -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" \
+            | grep -o '"name":"[^"]*Release.zip"' | head -1 | cut -d'"' -f4)
+          echo "asset=$NAME"
+          curl -sSL -o out/Vector-Release.zip \
+            "https://github.com/${{ github.repository }}/releases/download/$TAG/$NAME"
+          ls -la out/
+          sha256sum out/Vector-Release.zip | tee out/sha256.txt
+
+      - name: Split into text chunks
+        run: |
+          set -euo pipefail
+          cd out
+          rm -f part_* manifest.txt
+          split -b 900k -d -a 3 Vector-Release.zip part_
+          for f in part_*; do base64 -w 0 "$f" > "$f.b64"; rm "$f"; done
+          ls -la *.b64 | awk '{print $5, $9}' > manifest.txt
+          cat manifest.txt
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B dist
+          git add -A
+          git commit -m "Export Vector release zip (base64 chunks)" || echo "nothing"
+          git push -f origin dist
