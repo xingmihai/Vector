@@ -62,6 +62,7 @@ import org.matrix.vector.ui.logs.LogTraceScreen
 import org.matrix.vector.ui.logs.LogsScreen
 import org.matrix.vector.ui.navigation.FloatingPanelNav
 import org.matrix.vector.ui.navigation.PanelEditDone
+import org.matrix.vector.ui.navigation.PanelFloatingNavigationBar
 import org.matrix.vector.ui.navigation.PanelNavigationBar
 import org.matrix.vector.ui.navigation.PanelNavigationRail
 import org.matrix.vector.ui.navigation.isHorizontal
@@ -71,7 +72,10 @@ import org.matrix.vector.ui.navigation.PanelEditDone
 import org.matrix.vector.ui.navigation.rememberNavigator
 import org.matrix.vector.ui.store.RepoDetailsScreen
 import org.matrix.vector.ui.store.RepoScreen
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
+import top.yukonga.miuix.kmp.basic.FloatingToolbarDefaults
 import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationRail
 
 /**
@@ -118,6 +122,10 @@ fun VectorApp() {
     CompositionLocalProvider(LocalNavigator provides navigator) {
         val settings = ServiceLocator.settings
         val floating by settings.floatingNav.collectAsStateWithLifecycle()
+        val navBarMode by settings.navBarMode.collectAsStateWithLifecycle()
+        val useFloatingBar by settings.useFloatingBar.collectAsStateWithLifecycle()
+        val floatingBarStyle by settings.floatingBarStyle.collectAsStateWithLifecycle()
+        val floatingBarPosition by settings.floatingBarPosition.collectAsStateWithLifecycle()
         val editing = navigator.editingPanels
         // The container shows only at the root of a panel. On a detail screen none of the items is
         // the current destination, and a navigation bar highlighting nothing is worse than none.
@@ -133,7 +141,10 @@ fun VectorApp() {
         // Present at the root of a panel, where one of its items is the current destination; on a
         // detail screen a container highlighting nothing is worse than none. The floating style has
         // no container at all — except while rearranging, when there would be nothing to rearrange.
-        val showContainer = atRoot && (!floating || editing)
+        // Two settings, one of which makes the other moot: while the strip is floating the panels
+        // are not in the ball, so the ball is the one that gives way.
+        val ball = floating && !useFloatingBar
+        val showContainer = atRoot && (!ball || editing)
 
         // The destinations, and the ball that replaces the container when there is none.
         val content: @Composable () -> Unit = {
@@ -160,7 +171,7 @@ fun VectorApp() {
                 // must never ask for SYSTEM_ALERT_WINDOW. It follows the same rule the container
                 // does — present at the root of a panel, gone on a detail screen that has its own
                 // back affordance.
-                if (floating && !editing && atRoot) {
+                if (ball && !editing && atRoot) {
                     FloatingPanelNav(
                         panels = navigator.panels,
                         current = navigator.currentTopLevel,
@@ -183,16 +194,49 @@ fun VectorApp() {
                             PanelEditDone(onDone = { navigator.editingPanels = false })
                         }
                     }
-                    NavigationBar {
-                        PanelNavigationBar(
-                            panels = navigator.panels,
-                            current = navigator.currentTopLevel,
-                            editing = editing,
-                            onSelect = { route -> navigator.switchTo(route) },
-                            onEdit = { navigator.editingPanels = true },
-                            onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
-                            onMove = { from, to -> navigator.movePanel(from, to) },
-                        )
+                    if (useFloatingBar) {
+                        FloatingNavigationBar(
+                            // A capsule has no alignment of its own; a corner radius this large is
+                            // what makes the strip one.
+                            cornerRadius =
+                                if (floatingBarStyle == 1) 100.dp
+                                else FloatingToolbarDefaults.CornerRadius,
+                            horizontalAlignment =
+                                when (floatingBarPosition) {
+                                    1 -> Alignment.Start
+                                    2 -> Alignment.End
+                                    else -> Alignment.CenterHorizontally
+                                },
+                        ) {
+                            PanelFloatingNavigationBar(
+                                panels = navigator.panels,
+                                current = navigator.currentTopLevel,
+                                editing = editing,
+                                onSelect = { route -> navigator.switchTo(route) },
+                                onEdit = { navigator.editingPanels = true },
+                                onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
+                                onMove = { from, to -> navigator.movePanel(from, to) },
+                            )
+                        }
+                    } else {
+                        NavigationBar(
+                            // Whatever the preference holds, it is an index into Miuix's enum, and
+                            // the enum is theirs to lengthen: an unknown one falls back to the
+                            // first rather than taking the bar down with it.
+                            mode = NavigationBarDisplayMode.entries.getOrElse(navBarMode) {
+                                NavigationBarDisplayMode.IconAndText
+                            },
+                        ) {
+                            PanelNavigationBar(
+                                panels = navigator.panels,
+                                current = navigator.currentTopLevel,
+                                editing = editing,
+                                onSelect = { route -> navigator.switchTo(route) },
+                                onEdit = { navigator.editingPanels = true },
+                                onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
+                                onMove = { from, to -> navigator.movePanel(from, to) },
+                            )
+                        }
                     }
                 }
             }
