@@ -404,4 +404,8 @@
     <string name="launcher_prompt_body">Vector はインストールされるのではなく、別のプロセス内で実行されるため、ランチャーには何も表示されず、Vector に戻ってくる手段もありません。ホーム画面にショートカットを作成するか、通常のアプリとしてインストールしてください。</string>
     <string name="launcher_prompt_never">今後表示しない</string>
     <string name="update_reload">更新</string>
+    <string name="settings_nav_bar_mode">NavigationBar Mode</string>
+    <string name="settings_floating_bar">Use FloatingNavigationBar</string>
+    <string name="settings_floating_bar_style">FloatingNavigationBar Style</string>
+    <string name="settings_floating_bar_position">FloatingNavigationBar Position</string>
 </resources>
