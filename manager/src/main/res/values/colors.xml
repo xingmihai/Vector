@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Default background (White) -->
-    <color name="ic_launcher_bg">#FFFFFF</color>
+    <!-- The pink LSPosed sits the mark on. -->
+    <color name="ic_launcher_bg">#F48FB1</color>
+    <color name="ic_launcher_foreground">#FFFFFF</color>
 </resources>
