@@ -170,6 +170,10 @@ class FrameworkUpdateViewModel : ViewModel() {
     private val _root = MutableStateFlow(RootState())
     val root: StateFlow<RootState> = _root.asStateFlow()
 
+    /** Whether [reload] is currently out asking. Drives the refresh button's spinner. */
+    private val _reloading = MutableStateFlow(false)
+    val reloading: StateFlow<Boolean> = _reloading.asStateFlow()
+
     init {
         viewModelScope.launch {
             // One log for the requests these blocks make. They all fail from the same unreachable
@@ -182,12 +186,12 @@ class FrameworkUpdateViewModel : ViewModel() {
                 }
             _root.value = RootState(code)
         }
+        // Last, because Kotlin runs initialisers and init blocks in the order they are written
+        // and reload() reads [_reloading]: declared above it, this coroutine starts with the
+        // flag already there; declared below it, the flag is still null and the constructor
+        // dies on `null.getValue()` before the screen has drawn a frame.
         reload()
     }
-
-    /** Whether [reload] is currently out asking. Drives the refresh button's spinner. */
-    private val _reloading = MutableStateFlow(false)
-    val reloading: StateFlow<Boolean> = _reloading.asStateFlow()
 
     /**
      * Reads the release list again, past the cache.
