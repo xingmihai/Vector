@@ -21,19 +21,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p out
-          ID=$(curl -sSL -H "Authorization: token $GH_TOKEN" \
-               -H "Accept: application/vnd.github+json" \
-               "https://api.github.com/repos/${{ github.repository }}/releases/tags/canary-3176" \
-             | python3 -c "
-          import json,sys
-          r=json.load(sys.stdin)[0]
-          print([a['id'] for a in r['assets'] if 'Release' in a['name']][0])
-          ")
-          echo "asset id=$ID"
-          curl -sSL -H "Authorization: token $GH_TOKEN" \
-               -H "Accept: application/octet-stream" \
-               -o out/Vector-Release.zip \
-               "https://api.github.com/repos/${{ github.repository }}/releases/assets/$ID"
+          gh release download canary-3176 --pattern '*Release.zip' --dir out
+          mv out/Vector-*-Release.zip out/Vector-Release.zip
           ls -la out/
           sha256sum out/Vector-Release.zip | tee out/sha256.txt
 
