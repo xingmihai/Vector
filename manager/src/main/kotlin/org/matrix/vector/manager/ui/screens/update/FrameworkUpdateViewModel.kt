@@ -4,6 +4,7 @@ import org.matrix.vector.manager.data.repository.ReleaseDirection
 import org.matrix.vector.manager.data.github.FrameworkRelease
 import org.matrix.vector.manager.data.github.ZipVariant
 import org.matrix.vector.manager.data.github.CanaryArtifact
+import org.matrix.vector.manager.data.github.GitHubRepository
 import kotlinx.coroutines.flow.combine
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -181,13 +182,44 @@ class FrameworkUpdateViewModel : ViewModel() {
                 }
             _root.value = RootState(code)
         }
+        reload()
+    }
+
+    /** Whether [reload] is currently out asking. Drives the refresh button's spinner. */
+    private val _reloading = MutableStateFlow(false)
+    val reloading: StateFlow<Boolean> = _reloading.asStateFlow()
+
+    /**
+     * Reads the release list again, past the cache.
+     *
+     * Opening the screen is the only thing that ever did this, and the list is cached for
+     * [GitHubRepository.REVALIDATE_MINUTES] — so a build published a minute ago was invisible
+     * until the screen was left and reopened, and a reader told to "try again later" had no way
+     * to try. Forced rather than revalidated: a button pressed to make something new appear
+     * must not come back with the answer already in hand.
+     */
+    fun reload() {
+        // Ignored while one is in flight. Two overlapping reloads race on the same state flow,
+        // and the slower one lands last — which would be the older answer.
+        if (_reloading.value) return
         viewModelScope.launch {
-            val installed =
-                daemon.getFrameworkVersionCode().getOrElse { e ->
-                    logW("update: installed framework version unavailable, update check skipped", e)
-                    0L
+            _reloading.value = true
+            try {
+                val installed =
+                    daemon.getFrameworkVersionCode().getOrElse { e ->
+                        logW("update: installed framework version unavailable, update check skipped", e)
+                        0L
+                    }
+                if (installed > 0) {
+                    updates.refresh(
+                        installed,
+                        daemon.getBuildStamp().getOrNull(),
+                        GitHubRepository.Freshness.Force,
+                    )
                 }
-            updates.refresh(installed, daemon.getBuildStamp().getOrNull())
+            } finally {
+                _reloading.value = false
+            }
         }
     }
 
