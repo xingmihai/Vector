@@ -968,8 +968,21 @@ class GitHubRepository(
          */
         const val CANARY_KEEP = 5
 
-        private const val API = "https://api.github.com/repos"
-        private const val API_ROOT = "https://api.github.com"
+        /**
+         * Every GitHub call is made through this proxy, not straight at GitHub.
+         *
+         * api.github.com and github.com are unreachable from behind the Great Firewall, and the
+         * manager reads its release list over them. Asked directly, the list comes back empty and
+         * the update screen falls back to its "nothing to install" copy with the install button
+         * greyed — which reads as "you are up to date" rather than "I could not look".
+         *
+         * The proxy rewrites the download links in the JSON it relays, so an asset the manager
+         * reads off a release points back at it and the zip is fetchable through the same door.
+         * Nothing but the base URL changes here: all paths are still GitHub's.
+         */
+        private const val GITHUB_PROXY = "https://vector-gh.xmhai.cn"
+        private const val API = "$GITHUB_PROXY/api/repos"
+        private const val API_ROOT = "$GITHUB_PROXY/api"
 
         /** The only status that is an answer about a person rather than about the hour. */
         private const val HTTP_NOT_FOUND = 404
