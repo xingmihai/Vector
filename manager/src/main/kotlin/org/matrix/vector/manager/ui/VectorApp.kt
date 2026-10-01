@@ -2,6 +2,7 @@ package org.matrix.vector.manager.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -65,7 +67,6 @@ import org.matrix.vector.ui.navigation.PanelNavigationRail
 import org.matrix.vector.ui.navigation.isHorizontal
 import org.matrix.vector.ui.navigation.LocalNavigator
 import org.matrix.vector.ui.navigation.Navigator
-import org.matrix.vector.ui.navigation.PanelBar
 import org.matrix.vector.ui.navigation.PanelEditDone
 import org.matrix.vector.ui.navigation.rememberNavigator
 import org.matrix.vector.ui.store.RepoDetailsScreen
