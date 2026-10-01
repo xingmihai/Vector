@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.absoluteOffset
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -402,11 +402,15 @@ private fun PanelSlot(
                 }
             }
         val itemModifier =
-            // The bar hands its slot a fixed size; filling it back up keeps the whole slot tappable
-            // rather than only the icon and label in the middle of it. The rail and the floating
-            // bar measure loosely and get no such modifier — filling there would stretch one item
+            // The slot's width, and only its width. The bar spaces its slots by weight, so the
+            // width is settled before the item is measured; the height is the item's own. Filling
+            // the height too was harmless while the container handed the bar a fixed height to
+            // fill, but the bar now measures itself, and a child asking for every pixel going
+            // makes the bar ask for the whole window: the bar fills the screen with the panels
+            // along its top edge and the destination gets nothing. The rail and the floating bar
+            // measure loosely and get no such modifier — filling there would stretch one item
             // down the whole rail, or one floating item across the whole strip.
-            (if (fillSlot) Modifier.fillMaxSize() else Modifier)
+            (if (fillSlot) Modifier.fillMaxWidth() else Modifier)
                 .graphicsLayer { alpha = if (hidden) HIDDEN_ALPHA else 1f }
                 .then(itemSemantics)
         // Nothing to select while rearranging: a tap in edit mode is either the badge or the start
