@@ -425,4 +425,8 @@
     <string name="launcher_prompt_body">Vector se ejecuta dentro de otro proceso en lugar de estar instalado, así que no aparece nada en tu launcher y no hay una forma evidente de volver. Dale un acceso directo en la pantalla de inicio, o instálalo como una app normal.</string>
     <string name="launcher_prompt_never">No volver a preguntar</string>
     <string name="update_reload">Actualizar</string>
+    <string name="settings_nav_bar_mode">NavigationBar Mode</string>
+    <string name="settings_floating_bar">Use FloatingNavigationBar</string>
+    <string name="settings_floating_bar_style">FloatingNavigationBar Style</string>
+    <string name="settings_floating_bar_position">FloatingNavigationBar Position</string>
 </resources>
