@@ -45,7 +45,7 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material3.TextOverflow
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -669,8 +669,8 @@ private fun ActivityPreviewCard(
             Text(
                 text =
                     stringResource(
-                        if (feed.loading) R.string.home_loading_activity
-                        else R.string.home_no_activity
+                        if (feed.loaded) R.string.home_no_activity
+                        else R.string.home_loading_activity
                     ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
