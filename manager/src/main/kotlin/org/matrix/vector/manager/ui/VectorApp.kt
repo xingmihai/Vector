@@ -21,9 +21,11 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import org.matrix.vector.manager.data.github.GitHubRepository
 import org.matrix.vector.manager.data.repository.VectorLogSource
 import org.matrix.vector.manager.data.repository.VectorStoreInstallHost
 import org.matrix.vector.manager.di.ServiceLocator
+import org.matrix.vector.manager.ui.navigation.Activity
 import org.matrix.vector.manager.ui.navigation.Canary
 import org.matrix.vector.manager.ui.navigation.CrashTrace
 import org.matrix.vector.manager.ui.navigation.DeepLink
@@ -38,6 +40,7 @@ import org.matrix.vector.manager.ui.navigation.Troubleshoot
 import org.matrix.vector.manager.ui.navigation.VectorFloatingNavSettings
 import org.matrix.vector.manager.ui.navigation.VectorNavPanelStore
 import org.matrix.vector.manager.ui.navigation.Web
+import org.matrix.vector.manager.ui.screens.activity.ActivityScreen
 import org.matrix.vector.manager.ui.screens.canary.CanaryScreen
 import org.matrix.vector.manager.ui.screens.home.CrashTraceScreen
 import org.matrix.vector.manager.ui.screens.home.HomeScreen
@@ -203,6 +206,14 @@ private fun EntryProviderScope<NavKey>.registerRoutes(navigator: Navigator) {
             onOpenCanary = { navigator.go(Canary) },
             onOpenReport = { navigator.go(Troubleshoot) },
             onOpenUpdate = { navigator.go(FrameworkUpdate()) },
+            onOpenActivity = { navigator.go(Activity) },
+        )
+    }
+    entry<Activity> {
+        ActivityScreen(
+            onNavigateBack = { navigator.back() },
+            onOpenUrl = { url -> navigator.go(Web(url)) },
+            onOpenProfile = { c -> navigator.go(Web(c.profileUrl ?: GitHubRepository.REPO_URL)) },
         )
     }
     entry<TopLevelRoute.Modules> {
