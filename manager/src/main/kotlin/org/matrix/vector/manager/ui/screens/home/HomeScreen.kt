@@ -44,6 +44,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material3.TextOverflow
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -93,6 +95,8 @@ import org.matrix.vector.manager.ui.theme.CROWDIN_URL
 import org.matrix.vector.manager.ui.theme.VectorLocaleController
 import org.matrix.vector.ui.locale.LanguageSheet
 import org.matrix.vector.ui.locale.currentLocale
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import org.matrix.vector.manager.di.ServiceLocator
 import org.matrix.vector.ui.SharedAlertDialog
 import org.matrix.vector.ui.SharedSnackbarHost
@@ -140,6 +144,7 @@ fun HomeScreen(
     onOpenCanary: () -> Unit,
     onOpenReport: () -> Unit,
     onOpenUpdate: () -> Unit,
+    onOpenActivity: () -> Unit,
     viewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory),
 ) {
     val status by viewModel.status.collectAsStateWithLifecycle()
@@ -293,20 +298,13 @@ fun HomeScreen(
                         Spacer(Modifier.height(26.dp))
                     }
 
-                    communitySection(
-                        feed = feed,
-                        items = feedItems,
-                        loadingHistory = loadingHistory,
-                        historyStalled = historyStalled,
-                        windowChanged = windowChanged,
-                        authorFilter = authorFilter,
-                        onLoadMoreHistory = viewModel::loadMoreHistory,
-                        onToggleAuthor = viewModel::toggleAuthorFilter,
-                        onClearAuthors = viewModel::clearAuthorFilter,
-                        onOpenCommit = { c -> open(c.htmlUrl ?: GitHubRepository.REPO_URL) },
-                        onOpenPullRequest = { pr -> open("${GitHubRepository.REPO_URL}/pull/$pr") },
-                        onOpenProfile = { c -> open(c.profileUrl ?: GitHubRepository.REPO_URL) },
-                    )
+                    item {
+                        ActivityPreviewCard(
+                            feed = feed,
+                            items = feedItems,
+                            onClick = onOpenActivity,
+                        )
+                    }
 
                     item { Spacer(Modifier.height(24.dp)) }
                 }
@@ -495,7 +493,7 @@ private fun LauncherPrompt(
  * People come before commits deliberately. The section exists to make participation visible, and
  * faces do that faster than a list of subjects does.
  */
-private fun androidx.compose.foundation.lazy.LazyListScope.communitySection(
+internal fun androidx.compose.foundation.lazy.LazyListScope.communitySection(
     feed: CommunityFeed,
     items: List<FeedItem>,
     loadingHistory: Boolean,
@@ -607,7 +605,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.communitySection(
 }
 
 /** Stable identity per row, so a refresh does not rebuild the whole rail. */
-private fun FeedItem.key(): String =
+internal fun FeedItem.key(): String =
     when (this) {
         is FeedItem.Commit -> "c:${commit.sha}"
         is FeedItem.Gap -> "g:$afterSha"
@@ -617,7 +615,7 @@ private fun FeedItem.key(): String =
     }
 
 @Composable
-private fun BotBundle(count: Int, commits: List<TimelineCommit>) {
+internal fun BotBundle(count: Int, commits: List<TimelineCommit>) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     BotBundleRow(
         count = count,
@@ -637,8 +635,76 @@ private fun BotBundle(count: Int, commits: List<TimelineCommit>) {
     }
 }
 
+/**
+ * The feed's front door.
+ *
+ * Three rows and a way in, rather than the rail itself: the rail is open-ended, and as the last
+ * thing on Home it made everything after it unreachable. It was also the only part of Home that
+ * needed the network, so offline the page ended here with nothing to read.
+ */
 @Composable
-private fun QuarterHeadline(feed: CommunityFeed, windowChanged: Boolean) {
+private fun ActivityPreviewCard(
+    feed: CommunityFeed,
+    items: List<FeedItem>,
+    onClick: () -> Unit,
+) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.home_quarter_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = MiuixTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                Icons.AutoMirrored.Rounded.ArrowForward,
+                contentDescription = null,
+                tint = MiuixTheme.colorScheme.onSurfaceVariantActions,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+        Spacer(Modifier.height(10.dp))
+        val recent = items.filterIsInstance<FeedItem.Commit>().take(3)
+        if (recent.isEmpty()) {
+            Text(
+                text =
+                    stringResource(
+                        if (feed.loading) R.string.home_loading_activity
+                        else R.string.home_no_activity
+                    ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+            )
+        } else {
+            recent.forEach { entry ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    ContributorAvatar(
+                        login = entry.commit.authorLogin,
+                        avatarUrl = entry.commit.avatarUrl,
+                        size = 20.dp,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        // The subject, not the hash: a hash is a reference for someone who already
+                        // knows the commit, and this row is for someone deciding whether to look.
+                        text = entry.commit.message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MiuixTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun QuarterHeadline(feed: CommunityFeed, windowChanged: Boolean) {
     val people = feed.contributors.size
     val context = LocalContext.current
     Column(Modifier.padding(bottom = 16.dp)) {
@@ -807,7 +873,7 @@ private fun ScrollControls(listState: LazyListState, modifier: Modifier = Modifi
  * the unfiltered state — there is no separate "off" to get out of step with.
  */
 @Composable
-private fun AuthorFilterBar(
+internal fun AuthorFilterBar(
     logins: List<String>,
     commits: Int,
     onRemove: (String) -> Unit,
@@ -894,7 +960,7 @@ enum class ContributorOrder(val key: String, val labelRes: Int) {
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ContributorRow(
+internal fun ContributorRow(
     contributors: List<Contributor>,
     selected: Set<String>,
     onClick: (Contributor) -> Unit,
