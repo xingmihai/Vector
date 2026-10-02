@@ -76,7 +76,6 @@ import org.matrix.vector.ui.store.RepoScreen
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingToolbarDefaults
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.drawscope.drawRect
 import androidx.compose.ui.platform.LocalDensity
 import org.matrix.vector.ui.navigation.lens
 import org.matrix.vector.ui.navigation.vibrancy
