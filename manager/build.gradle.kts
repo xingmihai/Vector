@@ -164,6 +164,9 @@ dependencies {
     // too, but screens live in this module, so it has to be named here as well.
     implementation(libs.miuix.ui)
     implementation(libs.miuix.icons)
+    // The glass strip samples the screen behind it, and both halves of that live here: the
+    // layer the destination is drawn into and the modifier that reads it back.
+    implementation(libs.miuix.blur)
 
     // Tooling dependencies, debug builds only, for UI previews.
     debugImplementation(libs.androidx.compose.ui.tooling)
