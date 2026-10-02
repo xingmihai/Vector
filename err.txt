@@ -1,0 +1,75 @@
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/VectorApp.kt:275:51 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/VectorApp.kt:276:37 Unresolved reference 'mutableStateOf'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/VectorApp.kt:278:55 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/VectorApp.kt:278:66 Unresolved reference 'mutableStateOf'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/VectorApp.kt:287:66 Unresolved reference 'not' for operator '!'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/VectorApp.kt:288:63 Argument type mismatch: actual type is 'Alignment', but 'Alignment.Horizontal' was expected.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/VectorApp.kt:291:101 Unresolved reference 'Tune'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/VectorApp.kt:299:67 Argument type mismatch: actual type is 'Alignment', but 'Alignment.Horizontal' was expected.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixHomeScreen.kt:243:23 No value passed for parameter 'controller'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:46:39 Unresolved reference 'InstalledModule'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:47:39 Unresolved reference 'ModuleFacts'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:48:39 Unresolved reference 'ModuleFilter'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:49:39 Unresolved reference 'ModuleKey'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:50:39 Unresolved reference 'ModuleSort'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:51:53 Unresolved reference 'BatchOutcome'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:239:47 Unresolved reference 'label'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:256:37 Unresolved reference 'isNotEmpty'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:330:29 @Composable invocations can only happen from the context of a @Composable function
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:361:19 Unresolved reference 'InstalledModule'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:367:16 Unresolved reference 'InstalledModule'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:369:11 Argument type mismatch: actual type is 'List<??? (Unresolved qualified name: InstalledModule)>', but 'Int' was expected.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:369:34 Unresolved reference 'packageName'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:369:52 Unresolved reference 'userId'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:372:44 Unresolved reference 'packageName'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:372:64 Unresolved reference 'userId'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:373:32 Unresolved reference 'packageName'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:374:41 Unresolved reference 'packageName'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:374:61 Unresolved reference 'userId'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:393:13 Unresolved reference 'InstalledModule'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:400:16 Unresolved reference 'InstalledModule'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:408:24 Unresolved reference 'isEnabled'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:409:32 Unresolved reference 'onSurfaceVariant'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:417:42 Unresolved reference 'applicationInfo'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:422:23 Unresolved reference 'appName'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:423:30 Unresolved reference 'versionName'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:424:30 Unresolved reference 'description'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:426:38 Unresolved reference 'declaresApiVersion'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:430:36 Unresolved reference 'isLegacy'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:436:57 Unresolved reference 'apiVersion'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:442:26 Argument type mismatch: actual type is '((String) -> Unit)?', but '(() -> Unit)?' was expected.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:443:26 Unresolved reference 'isEnabled'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:446:85 Unresolved reference 'packageName'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:446:105 Unresolved reference 'userId'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:491:62 Unresolved reference 'onSurfaceVariant'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:506:47 Unresolved reference 'onSurfaceVariant'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:517:48 Unresolved reference 'onSurfaceVariant'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:553:86 Unresolved reference 'logs_ok'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:574:52 Unresolved reference 'onSurfaceVariant'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:603:14 Unresolved reference 'BatchOutcome'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:608:54 Unresolved reference 'changed'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:608:71 Unresolved reference 'changed'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:609:60 Unresolved reference 'already'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:609:77 Unresolved reference 'already'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:611:17 Unresolved reference 'failed'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:614:25 Unresolved reference 'changed'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:615:25 Unresolved reference 'changed'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:615:43 Unresolved reference 'failed'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:617:17 Unresolved reference 'changed'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:617:41 Unresolved reference 'already'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:618:57 Unresolved reference 'already'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:618:74 Unresolved reference 'already'.
+e: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/miuix/MiuixModulesScreen.kt:619:17 Unresolved reference 'already'.
+108:* What went wrong:
+109-Execution failed for task ':manager:compileReleaseKotlin' (registered by plugin 'com.android.internal.application').
+110-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+111-   > Compilation error. See log for more details
+112-
+113-* Try:
+114-> Run with --stacktrace option to get the stack trace.
+115-> Run with --info or --debug option to get more log output.
+116-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+117-> Get more help at https://help.gradle.org.
+118-
+119-BUILD FAILED in 47s
+120-27 actionable tasks: 27 executed
