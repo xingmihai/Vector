@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Only for one library: Miuix's blur module publishes minSdk 33 because the AGSL runtime shaders
-  it runs do not exist before then. The rest of the manager goes down to 27. Overriding the merge
-  here -- in the module that is the lower of the two and draws the dependency in -- keeps that
-  floor; the glass path is gated at runtime by isRuntimeShaderSupported(), below which the bar
-  falls back to its flat capsule and nothing from the library is reached.
+  it runs do not exist before then, while the rest of the manager goes down to 27. Overriding the
+  merge here, in the module that is the lower of the two and draws the dependency in, keeps that
+  floor. The glass path is gated at runtime by isRuntimeShaderSupported(), below which the strip
+  falls back to the flat capsule it always drew and nothing from the library is reached.
 -->
-<manifest xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <uses-sdk tools:overrideLibrary="top.yukonga.miuix.kmp.blur" />
 </manifest>
