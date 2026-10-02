@@ -272,12 +272,33 @@ fun VectorApp() {
                                 }
                             }
                             if (glass && !editing) {
+                                var pillTuning by remember {
+                                    mutableStateOf(org.matrix.vector.ui.navigation.GlassPillTuning())
+                                }
+                                var showPillTuning by remember { mutableStateOf(false) }
                                 PanelGlassBar(
                                     panels = navigator.panels,
                                     current = navigator.currentTopLevel,
                                     onSelect = { route -> navigator.switchTo(route) },
                                     backdrop = glassBackdrop,
+                                    tuning = pillTuning,
                                 )
+                                androidx.compose.material3.SmallFloatingActionButton(
+                                    onClick = { showPillTuning = !showPillTuning },
+                                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                                ) {
+                                    androidx.compose.material3.Icon(
+                                        imageVector = androidx.compose.material.icons.Icons.Default.Tune,
+                                        contentDescription = null,
+                                    )
+                                }
+                                if (showPillTuning) {
+                                    org.matrix.vector.ui.navigation.GlassPillTuningPanel(
+                                        tuning = pillTuning,
+                                        onTuningChange = { pillTuning = it },
+                                        modifier = Modifier.align(Alignment.TopCenter),
+                                    )
+                                }
                             } else {
                             FloatingNavigationBar(
                                 // A capsule has no alignment of its own; a corner radius this large
