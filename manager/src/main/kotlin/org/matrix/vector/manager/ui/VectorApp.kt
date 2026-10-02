@@ -85,6 +85,23 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.drawRect
+import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.platform.LocalDensity
+import org.matrix.vector.ui.navigation.IosIndicatorSpecular
+import org.matrix.vector.ui.navigation.lens
+import org.matrix.vector.ui.navigation.rememberGravityRotatedHighlight
+import org.matrix.vector.ui.navigation.vibrancy
+import top.yukonga.miuix.kmp.blur.blur
+import top.yukonga.miuix.kmp.blur.drawBackdrop
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationRail
@@ -204,6 +221,8 @@ fun VectorApp() {
         val glassSurface = MiuixTheme.colorScheme.surfaceContainer
         // The effect block is not a density scope, and it runs per frame: the radii are converted
         // once here rather than on every draw.
+        val glassHighlight = rememberGravityRotatedHighlight(IosIndicatorSpecular, extraDegrees = -45f)
+        val glassDark = isSystemInDarkTheme()
         val glassRadius = with(LocalDensity.current) { 4.dp.toPx() }
         val glassRefraction = with(LocalDensity.current) { 24.dp.toPx() }
         val glassPadding = with(LocalDensity.current) { 40.dp.toPx() }
@@ -273,7 +292,19 @@ fun VectorApp() {
                                     else Modifier)
                                     .then(
                                     if (glass) {
-                                        Modifier.drawBackdrop(
+                                        Modifier
+                                            // The strip is a sheet of glass lifted off the screen,
+                                            // and it is the shadow underneath that says so; without
+                                            // it the refraction reads as a smudge on the surface.
+                                            .dropShadow(
+                                                shape = GlassShape,
+                                                shadow = Shadow(
+                                                    radius = 10.dp,
+                                                    color = Color.Black,
+                                                    alpha = if (glassDark) 0.2f else 0.1f,
+                                                ),
+                                            )
+                                            .drawBackdrop(
                                             backdrop = glassBackdrop,
                                             shape = { GlassShape },
                                             effects = {
@@ -291,10 +322,15 @@ fun VectorApp() {
                                                     refractionAmount = glassRefraction,
                                                 )
                                             },
+                                            // The rim: a stroke lit from where the light would
+                                            // come from, rotated as the device tilts. It is the
+                                            // part that makes an edge look like an edge rather
+                                            // than a rounded rectangle.
+                                            highlight = { glassHighlight.value.copy(alpha = 0.75f) },
                                             // A tinted sheet over the refraction, so the strip
                                             // keeps a colour of its own and stays legible over
                                             // whatever happens to be scrolling behind it.
-                                            onDrawSurface = { drawRect(glassSurface.copy(alpha = 0.55f)) },
+                                            onDrawSurface = { drawRect(glassSurface.copy(alpha = 0.4f)) },
                                         )
                                     } else {
                                         Modifier
