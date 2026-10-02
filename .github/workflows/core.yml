@@ -190,7 +190,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com" || true
           git checkout -B dbg 2>&1 | head -3 || true
           git commit --allow-empty -F dbg.txt -m "dbg: build output" 2>&1 | head -3 || true
-          git push -f origin HEAD:refs/heads/dbg 2>&1 | head -5 || true
+          git push -f https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:refs/heads/dbg 2>&1 | tail -3 || true
           echo "push attempted"
 
       - name: Prepare artifact
