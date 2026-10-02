@@ -271,15 +271,11 @@ fun VectorApp() {
                                     PanelEditDone(onDone = { navigator.editingPanels = false })
                                 }
                             }
-                            if (glass) {
+                            if (glass && !editing) {
                                 PanelGlassBar(
                                     panels = navigator.panels,
                                     current = navigator.currentTopLevel,
-                                    editing = editing,
                                     onSelect = { route -> navigator.switchTo(route) },
-                                    onEdit = { navigator.editingPanels = true },
-                                    onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
-                                    onMove = { from, to -> navigator.movePanel(from, to) },
                                     backdrop = glassBackdrop,
                                 )
                             } else {
