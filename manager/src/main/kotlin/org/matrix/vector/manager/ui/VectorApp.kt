@@ -87,7 +87,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.drawRect
 import androidx.compose.ui.graphics.shadow.Shadow
 import org.matrix.vector.ui.navigation.IosIndicatorSpecular
 import org.matrix.vector.ui.navigation.rememberGravityRotatedHighlight
