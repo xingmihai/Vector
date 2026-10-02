@@ -1,0 +1,40 @@
+name: exp6
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  exp2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Download the release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download canary-3342 \
+            --repo xingmihai/Vector \
+            --pattern 'Vector-vcanary-3341-3342-Release.zip'
+          ls -la *.zip
+          sha256sum Vector-vcanary-3341-3342-Release.zip | tee sha.txt
+
+      - name: Split and publish
+        run: |
+          git config user.name "ci"
+          git config user.email "ci@example.com"
+          git checkout --orphan exp6out || git checkout exp6out
+          git rm -rf . || true
+          mkdir -p parts
+          split -b 4000000 Vector-vcanary-3341-3342-Release.zip parts/p
+          cp sha.txt parts/sha.txt
+          ls -la parts
+          git add -f parts
+          git commit -m "ci: export build 3342"
+          git push -f origin exp6out
