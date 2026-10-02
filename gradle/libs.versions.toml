@@ -55,6 +55,7 @@ miuix-ui = { group = "top.yukonga.miuix.kmp", name = "miuix-ui-android", version
 miuix-preference = { group = "top.yukonga.miuix.kmp", name = "miuix-preference-android", version.ref = "miuix" }
 miuix-icons = { group = "top.yukonga.miuix.kmp", name = "miuix-icons-android", version.ref = "miuix" }
 miuix-squircle = { group = "top.yukonga.miuix.kmp", name = "miuix-squircle-android", version.ref = "miuix" }
+   miuix-blur = { group = "top.yukonga.miuix.kmp", name = "miuix-blur-android", version.ref = "miuix" }
 
 # Navigation 3. Stable since Nov 2025; the back stack is a plain observable list
 # of NavKey objects rather than route strings.
