@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -415,17 +414,6 @@ private fun PanelSlot(
                     }
                 }
             }
-        if (pillIndicator && selected) {
-            Box(
-                // Sized off the slot, which is sized off the item: the pill is as wide as the
-                // icon it sits behind and no wider, so it reads as marking that tab rather than
-                // as a second bar inside the first.
-                Modifier
-                    .matchParentSize()
-                    .clip(CircleShape)
-                    .background(MiuixTheme.colorScheme.onSurface.copy(alpha = PILL_ALPHA))
-            )
-        }
         val itemModifier =
             // The slot's width, and only its width. The bar spaces its slots by weight, so the
             // width is settled before the item is measured; the height is the item's own. Filling
@@ -436,6 +424,19 @@ private fun PanelSlot(
             // measure loosely and get no such modifier — filling there would stretch one item
             // down the whole rail, or one floating item across the whole strip.
             (if (fillSlot) Modifier.fillMaxWidth() else Modifier)
+                // The iOS-like strip marks the selected tab with a capsule behind it. Drawn on the
+                // item itself rather than as a sibling box, so the capsule is exactly the size the
+                // item measures itself to be — no second width to keep in step, and no need for a
+                // parent to match.
+                .then(
+                    if (pillIndicator && selected) {
+                        Modifier
+                            .clip(CircleShape)
+                            .background(MiuixTheme.colorScheme.onSurface.copy(alpha = PILL_ALPHA))
+                    } else {
+                        Modifier
+                    },
+                )
                 .graphicsLayer { alpha = if (hidden) HIDDEN_ALPHA else 1f }
                 .then(itemSemantics)
         // Nothing to select while rearranging: a tap in edit mode is either the badge or the start
