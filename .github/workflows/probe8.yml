@@ -15,15 +15,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Submodules
-        run: |
-          SUBMODULES="external/lsplant external/dobby external/fmt external/xz-embedded \
-                      external/lsplt external/apache/commons-lang external/axml/manifest-editor"
-          for attempt in 1 2 3; do
-            git submodule update --init --recursive --depth 1 -- $SUBMODULES && break
-            sleep 15
-          done
-
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
@@ -33,10 +24,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Zip all
+      # Only the two modules that hold the screen. The daemon needs the libxposed sources
+      # that this workflow does not set up, and compiling it here would bury the errors
+      # being looked for under a hundred of its own.
+      - name: Compile
         continue-on-error: true
         run: |
-          ./gradlew zipAll 2>&1 | tee build.log || true
+          ./gradlew :manager:compileReleaseKotlin :manager-ui:compileReleaseKotlin 2>&1 | tee build.log || true
 
       - name: Errors
         if: always()
