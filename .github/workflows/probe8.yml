@@ -15,6 +15,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Submodules
+        run: |
+          SUBMODULES="external/lsplant external/dobby external/fmt external/xz-embedded \
+                      external/lsplt external/apache/commons-lang external/axml/manifest-editor"
+          for attempt in 1 2 3; do
+            git submodule update --init --recursive --depth 1 -- $SUBMODULES && break
+            sleep 15
+          done
+
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
