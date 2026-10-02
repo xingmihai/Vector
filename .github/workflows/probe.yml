@@ -15,6 +15,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          submodules: recursive
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -27,29 +28,27 @@ jobs:
 
       - name: Compile
         id: c
-        run: |
-          set -o pipefail
-          ./gradlew :manager:compileReleaseKotlin :manager-ui:compileReleaseKotlin --console=plain 2>&1 | tee build.log
-          echo "exit=$?"
         continue-on-error: true
+        run: |
+          ./gradlew :manager:compileReleaseKotlin :manager-ui:compileReleaseKotlin --console=plain 2>&1 | tee build.log
 
       - name: Errors
+        if: always()
         run: |
           grep -E '^e: ' build.log > err.txt || true
-          echo "--- count ---"
           wc -l err.txt
           head -60 err.txt
-          echo "--- tail of build.log ---"
-          tail -40 build.log
+          echo "--- tail ---"
+          tail -30 build.log
 
       - name: Publish err
+        if: always()
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B probe-out
-          cp build.log probe-build.log || true
-          cp err.txt probe-err.txt || true
-          git add -A
+          touch err.txt build.log
+          git add -f err.txt build.log
           git commit -m "probe output" || echo nothing
           git push -f origin probe-out
