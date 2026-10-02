@@ -1,0 +1,50 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+Type-safe project accessors is an incubating feature.
+> Task :manager:preBuild UP-TO-DATE
+> Task :manager:preReleaseBuild UP-TO-DATE
+> Task :manager:generateReleaseBuildConfig
+> Task :manager:generateReleaseResources
+> Task :manager:packageReleaseResources
+> Task :manager-ui:preBuild UP-TO-DATE
+> Task :manager-ui:preReleaseBuild UP-TO-DATE
+> Task :manager-ui:processReleaseNavigationResources
+> Task :services:manager-service:preBuild UP-TO-DATE
+> Task :services:manager-service:preReleaseBuild UP-TO-DATE
+> Task :services:manager-service:processReleaseNavigationResources
+> Task :manager:processReleaseNavigationResources
+> Task :manager-ui:generateReleaseBuildConfig
+> Task :manager-ui:generateReleaseResources
+> Task :manager:parseReleaseLocalResources
+> Task :manager-ui:packageReleaseResources
+> Task :manager-ui:javaPreCompileRelease
+> Task :manager-ui:parseReleaseLocalResources
+> Task :manager:generateReleaseRFile
+> Task :services:manager-service:generateReleaseBuildConfig
+> Task :services:manager-service:generateReleaseResources
+> Task :manager-ui:generateReleaseRFile
+> Task :services:manager-service:packageReleaseResources
+> Task :services:manager-service:javaPreCompileRelease
+> Task :services:manager-service:parseReleaseLocalResources
+> Task :services:manager-service:generateReleaseRFile
+> Task :services:manager-service:compileReleaseAidl
+> Task :services:manager-service:compileReleaseKotlin NO-SOURCE
+> Task :services:manager-service:compileReleaseJavaWithJavac
+> Task :services:manager-service:bundleLibCompileToJarRelease
+> Task :manager-ui:compileReleaseKotlin
+> Task :manager-ui:compileReleaseJavaWithJavac
+> Task :manager-ui:bundleLibCompileToJarRelease
+
+> Task :manager:compileReleaseKotlin
+w: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/data/repository/SettingsRepository.kt:583:35 The corresponding parameter in the supertype 'StoreSettings' is named 'token'. This may cause problems when calling this function with named arguments.
+w: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/VectorApp.kt:151:69 'fun currentWindowAdaptiveInfo(supportLargeAndXLargeWidth: Boolean = ...): WindowAdaptiveInfo' is deprecated. Please use V2 version of this function to support L and XL width size classes.
+w: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/screens/modules/ScopeScreen.kt:670:44 'fun rememberPlainTooltipPositionProvider(spacingBetweenTooltipAndAnchor: Dp = ...): PopupPositionProvider' is deprecated. Deprecated in favor of rememberTooltipPositionProvider API.
+w: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/screens/modules/ScopeScreen.kt:790:44 'fun rememberPlainTooltipPositionProvider(spacingBetweenTooltipAndAnchor: Dp = ...): PopupPositionProvider' is deprecated. Deprecated in favor of rememberTooltipPositionProvider API.
+w: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/screens/modules/ScopeScreen.kt:868:44 'fun rememberPlainTooltipPositionProvider(spacingBetweenTooltipAndAnchor: Dp = ...): PopupPositionProvider' is deprecated. Deprecated in favor of rememberTooltipPositionProvider API.
+w: file:///home/runner/work/Vector/Vector/manager/src/main/kotlin/org/matrix/vector/manager/ui/theme/Theme.kt:39:42 Unnecessary safe call on a non-null receiver of type 'Int'.
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1790919478744.json
+
+[Incubating] Problems report is available at: file:///home/runner/work/Vector/Vector/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 1m 11s
+27 actionable tasks: 27 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.7.0/userguide/configuration_cache_enabling.html
