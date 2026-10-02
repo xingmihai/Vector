@@ -1,5 +1,6 @@
 package org.matrix.vector.ui.navigation
 
+import kotlin.math.roundToInt
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
