@@ -184,6 +184,15 @@ fun VectorApp() {
             }
         }
 
+        // The glass strip needs to see what is behind it, which in Compose means one thing: the
+        // destination has to be drawn into a layer the bar can then sample. That layer is the
+        // cost of the effect -- the whole screen is composited once more -- so it is created only
+        // when the strip that needs it is actually on screen, and only where the runtime shaders
+        // exist. Below API 33 the same setting draws the flat capsule it always drew.
+        val glass = useFloatingBar && floatingBarStyle == 1 && isRuntimeShaderSupported()
+        val glassBackdrop = rememberLayerBackdrop()
+        val glassSurface = MiuixTheme.colorScheme.surfaceContainer
+
         if (horizontal) {
             // Miuix's own scaffold rather than a column of ours. A column shares the window's
             // height between its children, and a bar that fills the width and asks for no
@@ -245,8 +254,33 @@ fun VectorApp() {
                                 // is at this height, so the radius is not where the two styles
                                 // differ. The height and the pill behind the current tab are.
                                 modifier =
-                                    if (floatingBarStyle == 1) Modifier.height(IosBarHeight)
-                                    else Modifier,
+                                    (if (floatingBarStyle == 1) Modifier.height(IosBarHeight)
+                                    else Modifier)
+                                    .then(
+                                    if (glass) {
+                                        Modifier.drawBackdrop(
+                                            backdrop = glassBackdrop,
+                                            shape = { GlassShape },
+                                            effects = {
+                                                // Wide enough for the lens to reach outside the
+                                                // shape; it sets its own floor but the blur needs
+                                                // the same margin to have anything to read.
+                                                padding = maxOf(padding, 40.dp.toPx())
+                                                vibrancy()
+                                                blur(4.dp.toPx(), 4.dp.toPx())
+                                                lens(
+                                                    refractionHeight = 24.dp.toPx(),
+                                                    refractionAmount = 24.dp.toPx(),
+                                                )
+                                            },
+                                            // A tinted sheet over the refraction, so the strip
+                                            // keeps a colour of its own and stays legible over
+                                            // whatever happens to be scrolling behind it.
+                                            onDrawSurface = { drawRect(glassSurface.copy(alpha = 0.55f)) },
+                                        )
+                                    } else {
+                                        Modifier
+                                    }),
                                 cornerRadius =
                                     if (floatingBarStyle == 1) 100.dp
                                     else FloatingToolbarDefaults.CornerRadius,
@@ -272,7 +306,14 @@ fun VectorApp() {
                     }
                 },
             ) { padding ->
-                Box(Modifier.fillMaxSize().padding(padding)) { content() }
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .then(if (glass) Modifier.layerBackdrop(glassBackdrop) else Modifier)
+                ) {
+                    content()
+                }
             }
         } else {
             Row(Modifier.fillMaxSize()) {
@@ -403,3 +444,6 @@ private fun EntryProviderScope<NavKey>.registerRoutes(navigator: Navigator) {
 
 /** The strip in the iOS arrangement is taller than the default one. */
 private val IosBarHeight = 64.dp
+
+/** The silhouette the glass is cut to: a capsule, matching the strip's own radius. */
+private val GlassShape = RoundedCornerShape(50.dp)
