@@ -46,4 +46,9 @@ dependencies {
     implementation(libs.miuix.preference)
     implementation(libs.miuix.icons)
     implementation(libs.miuix.squircle)
+    // Only for the iOS-like floating bar, which samples what is behind it through a
+    // graphics layer, blurs that through an AGSL shader and refracts it. Nothing else in
+    // the manager draws through it, and the runtime gates it off below API 33, where
+    // those shaders do not exist.
+    implementation(libs.miuix.blur)
 }
