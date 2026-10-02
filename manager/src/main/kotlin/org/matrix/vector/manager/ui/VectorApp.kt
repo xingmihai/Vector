@@ -64,6 +64,7 @@ import org.matrix.vector.ui.logs.LogsScreen
 import org.matrix.vector.ui.navigation.FloatingPanelNav
 import org.matrix.vector.ui.navigation.PanelEditDone
 import org.matrix.vector.ui.navigation.PanelFloatingNavigationBar
+import org.matrix.vector.ui.navigation.PanelGlassBar
 import org.matrix.vector.ui.navigation.PanelNavigationBar
 import org.matrix.vector.ui.navigation.PanelNavigationRail
 import org.matrix.vector.ui.navigation.isHorizontal
@@ -270,6 +271,18 @@ fun VectorApp() {
                                     PanelEditDone(onDone = { navigator.editingPanels = false })
                                 }
                             }
+                            if (glass) {
+                                PanelGlassBar(
+                                    panels = navigator.panels,
+                                    current = navigator.currentTopLevel,
+                                    editing = editing,
+                                    onSelect = { route -> navigator.switchTo(route) },
+                                    onEdit = { navigator.editingPanels = true },
+                                    onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
+                                    onMove = { from, to -> navigator.movePanel(from, to) },
+                                    backdrop = glassBackdrop,
+                                )
+                            } else {
                             FloatingNavigationBar(
                                 // A capsule has no alignment of its own; a corner radius this large
                                 // is what makes the strip one — and it is what the default already
@@ -343,6 +356,7 @@ fun VectorApp() {
                                     onMove = { from, to -> navigator.movePanel(from, to) },
                                     iosStyle = floatingBarStyle == 1,
                                 )
+                            }
                             }
                         }
                     }
