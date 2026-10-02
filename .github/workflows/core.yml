@@ -45,16 +45,32 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      # apache/commons-lang is the largest of these and is fetched anonymously, so it is the
+      # one that comes back empty often enough to matter. An empty checkout does not fail this
+      # step -- the clone reports success and the source directories are simply not there --
+      # and the build then dies much later in :external:apache:compileJava, on a symbol from a
+      # file that was never fetched. So retry, then assert the trees are actually populated.
       - name: Submodules
         run: |
-          git submodule update --init --recursive --depth 1 -- \
-            external/lsplant \
-            external/dobby \
-            external/fmt \
-            external/xz-embedded \
-            external/lsplt \
-            external/apache/commons-lang \
-            external/axml/manifest-editor
+          SUBMODULES="external/lsplant external/dobby external/fmt external/xz-embedded \
+                      external/lsplt external/apache/commons-lang external/axml/manifest-editor"
+          for attempt in 1 2 3; do
+            echo "::group::submodule fetch attempt $attempt"
+            git submodule update --init --recursive --depth 1 -- $SUBMODULES && break
+            echo "attempt $attempt failed"
+            sleep 15
+            echo "::endgroup::"
+          done
+          missing=0
+          for m in $SUBMODULES; do
+            if [ -z "$(ls -A "$m" 2>/dev/null)" ]; then
+              echo "::error::$m checked out empty"
+              missing=1
+            fi
+          done
+          if [ "$missing" != "0" ]; then exit 1; fi
+          test -f external/apache/commons-lang/src/main/java/org/apache/commons/lang3/reflect/MemberUtils.java \
+            || { echo "::error::commons-lang sources incomplete"; exit 1; }
 
       # github.com/libxposed has been taken down, so cloning services/libxposed and xposed/libxposed
       # -- the two submodules left out above -- fails. The same sources are published to Maven
