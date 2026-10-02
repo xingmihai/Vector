@@ -75,6 +75,17 @@ import org.matrix.vector.ui.store.RepoDetailsScreen
 import org.matrix.vector.ui.store.RepoScreen
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingToolbarDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.drawscope.drawRect
+import androidx.compose.ui.platform.LocalDensity
+import org.matrix.vector.ui.navigation.lens
+import org.matrix.vector.ui.navigation.vibrancy
+import top.yukonga.miuix.kmp.blur.blur
+import top.yukonga.miuix.kmp.blur.drawBackdrop
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarDisplayMode
 import top.yukonga.miuix.kmp.basic.NavigationRail
@@ -192,6 +203,11 @@ fun VectorApp() {
         val glass = useFloatingBar && floatingBarStyle == 1 && isRuntimeShaderSupported()
         val glassBackdrop = rememberLayerBackdrop()
         val glassSurface = MiuixTheme.colorScheme.surfaceContainer
+        // The effect block is not a density scope, and it runs per frame: the radii are converted
+        // once here rather than on every draw.
+        val glassRadius = with(LocalDensity.current) { 4.dp.toPx() }
+        val glassRefraction = with(LocalDensity.current) { 24.dp.toPx() }
+        val glassPadding = with(LocalDensity.current) { 40.dp.toPx() }
 
         if (horizontal) {
             // Miuix's own scaffold rather than a column of ours. A column shares the window's
@@ -265,12 +281,15 @@ fun VectorApp() {
                                                 // Wide enough for the lens to reach outside the
                                                 // shape; it sets its own floor but the blur needs
                                                 // the same margin to have anything to read.
-                                                padding = maxOf(padding, 40.dp.toPx())
+                                                // The lens reaches outside the shape for the
+                                                // pixels it bends inwards, so the margin has to
+                                                // cover that before it covers the blur.
+                                                padding = maxOf(padding, glassPadding)
                                                 vibrancy()
-                                                blur(4.dp.toPx(), 4.dp.toPx())
+                                                blur(glassRadius, glassRadius)
                                                 lens(
-                                                    refractionHeight = 24.dp.toPx(),
-                                                    refractionAmount = 24.dp.toPx(),
+                                                    refractionHeight = glassRefraction,
+                                                    refractionAmount = glassRefraction,
                                                 )
                                             },
                                             // A tinted sheet over the refraction, so the strip
