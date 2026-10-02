@@ -313,8 +313,8 @@ fun PanelGlassBar(
                                 vibrancy()
                                 blur(with(density) { 4.dp.toPx() }, with(density) { 4.dp.toPx() })
                                 lens(
-                                    refractionHeight = with(density) { 24.dp.toPx() },
-                                    refractionAmount = with(density) { 24.dp.toPx() },
+                                    refractionHeight = with(density) { 12.dp.toPx() },
+                                    refractionAmount = with(density) { 12.dp.toPx() },
                                 )
                             },
                             highlight = { baseHighlight.value.copy(alpha = 0.75f) },
@@ -359,18 +359,15 @@ fun PanelGlassBar(
                                 vibrancy()
                                 blur(with(density) { 4.dp.toPx() }, with(density) { 4.dp.toPx() })
                                 lens(
-                                    refractionHeight = with(density) { 24.dp.toPx() },
-                                    refractionAmount = with(density) { 24.dp.toPx() },
+                                    refractionHeight = with(density) { 12.dp.toPx() },
+                                    refractionAmount = with(density) { 12.dp.toPx() },
                                 )
                             },
                             onDrawSurface = { drawRect(containerColor) },
                         )
                         .then(interactiveHighlight.modifier)
-                        // Same height and same padding as the visible row: the pill refracts
-                        // this pass, so any difference in where it sits is a difference in
-                        // what the pill shows. 4dp shorter and the tabs ride high in the glass.
-                        .height(64.dp)
-                        .padding(4.dp),
+                        .height(56.dp)
+                        .padding(horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     content = tabsContent,
                 )
@@ -380,7 +377,12 @@ fun PanelGlassBar(
                 val tabWidthDp = with(density) { tabWidthPx.toDp() }
                 Box(
                     modifier = Modifier
-                        .padding(horizontal = 4.dp)
+                        // Centred on the strip's content, not on the strip. The visible row is
+                        // 64dp with 4dp padding, so its tabs are centred at 32dp; a 48dp pill
+                        // laid out from the top centres at 24dp and samples the tabs from 8dp
+                        // above their middle, which is what put the refracted icons high in the
+                        // glass. 8dp top and bottom puts the pill's centre at 32dp too.
+                        .padding(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 12.dp)
                         .graphicsLayer {
                             val progressOffset = dampedDrag.value * tabWidthPx
                             translationX =
@@ -428,8 +430,8 @@ fun PanelGlassBar(
                                 alpha = dampedDrag.pressProgress,
                             )
                         }
-                        .height(48.dp)
-                        .width(tabWidthDp),
+                        .height(40.dp)
+                        .width(with(density) { tabWidthPx.toDp() - 8.dp }),
                 )
             }
         }
