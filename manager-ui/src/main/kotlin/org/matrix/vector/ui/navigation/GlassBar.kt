@@ -1,6 +1,5 @@
 package org.matrix.vector.ui.navigation
 
-import kotlin.math.roundToInt
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -28,8 +28,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -38,13 +40,13 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.blur.Backdrop
 import top.yukonga.miuix.kmp.blur.blur
 import top.yukonga.miuix.kmp.blur.drawBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import kotlin.math.roundToInt
 
 /**
  * The floating bar as a piece of glass: the strip refracts what scrolls behind it, and the pill
@@ -56,7 +58,13 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
  * *and* the labels drawn on it, so the pill bends the icon it sits behind rather than bending only
  * the screen behind the strip.
  *
- * [editing] turns all of it off: rearranging and dragging the pill would both be answering a
+ * The geometry is the library's own and it is not to be rearranged. The bar measures itself and
+ * the pill is placed from that measurement: [Row] padding of 4dp on each side is subtracted
+ * before dividing by the panel count, and the pill carries the same 4dp before its width. Move one
+ * of those and not the other and the pill drifts off the tab it belongs to — which reads as a
+ * second icon rather than as glass over the first.
+ *
+ * [editing] turns the drag off: rearranging and dragging the pill would both be answering a
  * horizontal drag, and the badge on each item already says which panels are here.
  */
 @Composable
@@ -77,9 +85,9 @@ fun PanelGlassBar(
     val scope = rememberCoroutineScope()
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
 
-    var widthPx by remember { mutableFloatStateOf(0f) }
+    var totalWidthPx by remember { mutableFloatStateOf(0f) }
     val insetPx = with(density) { 8.dp.toPx() }
-    val tabWidthPx = if (count == 0) 0f else ((widthPx - insetPx) / count).coerceAtLeast(0f)
+    val tabWidthPx = if (count == 0) 0f else ((totalWidthPx - insetPx) / count).coerceAtLeast(0f)
 
     val pillShape = remember { CircleShape }
     val tabsBackdrop = rememberLayerBackdrop()
@@ -103,7 +111,7 @@ fun PanelGlassBar(
             visibilityThreshold = 0.001f,
             initialScale = 1f,
             pressedScale = 78f / 56f,
-            canDrag = { it.x in 0f..widthPx },
+            canDrag = { it.x in 0f..totalWidthPx },
             onDragStarted = { },
             onDragStopped = {
                 val target = targetValue.roundToInt().coerceIn(0, (count - 1).coerceAtLeast(0))
@@ -124,9 +132,9 @@ fun PanelGlassBar(
         )
     }
 
-    // The strip, drawn twice: once to look at, and once into [tabsBackdrop] so the pill has
-    // something of its own to refract. The second pass is invisible and carries no gestures —
-    // duplicating the slots would duplicate their drag and their semantics with them.
+    // Drawn twice: once to look at, and once into [tabsBackdrop] so the pill has something of its
+    // own to refract. The second pass is invisible and carries no gestures — duplicating the slots
+    // would duplicate their drag and their semantics with them.
     val tabsContent: @Composable RowScope.() -> Unit = {
         items.forEachIndexed { index, destination ->
             Column(
@@ -156,38 +164,67 @@ fun PanelGlassBar(
     val pillAmountPx = with(density) { 14.dp.toPx() }
     val containerColor = MiuixTheme.colorScheme.surfaceContainer.copy(alpha = 0.4f)
     val isDark = isSystemInDarkTheme()
+    val pillHighlight = rememberGravityRotatedHighlight(IosIndicatorSpecular, extraDegrees = -45f)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .onSizeChanged { widthPx = it.width.toFloat() }
-            // Rearranging and switching panels would both answer a horizontal drag; while
-            // rearranging, the slots own the gesture.
-            .then(if (editing) Modifier else drag.modifier),
+            // The strip is inset from the window edge; 24dp each side is what the library's own
+            // example uses and the only thing that keeps it reading as a floating capsule.
+            .padding(horizontal = 24.dp, bottom = 8.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        FloatingNavigationBar(
+        Row(
             modifier = Modifier
-                .height(64.dp)
+                .fillMaxWidth()
+                .selectableGroup()
+                // Measured before the padding below it, so what arrives here is the full width
+                // and the 4dp on each side is still to come off.
+                .onSizeChanged { totalWidthPx = it.width.toFloat() }
+                // A sheet of glass lifted off the screen, and it is the shadow underneath that
+                // says so; without it the refraction reads as a smudge on the surface.
+                .dropShadow(
+                    shape = pillShape,
+                    shadow = Shadow(
+                        radius = 10.dp,
+                        color = Color.Black,
+                        // Lighter in light theme to avoid a visible grey fringe.
+                        alpha = if (isDark) 0.2f else 0.1f,
+                    ),
+                )
                 .drawBackdrop(
                     backdrop = backdrop,
                     shape = { pillShape },
                     effects = {
+                        // Wide enough for the lens to reach outside the shape; it sets its own
+                        // floor but the blur needs the same margin to have anything to read.
                         padding = maxOf(padding, lensPx * 2f)
                         vibrancy()
                         blur(blurPx, blurPx)
                         lens(refractionHeight = lensPx, refractionAmount = lensPx)
                     },
+                    // The rim: a stroke lit from where the light would come from, rotated as the
+                    // device tilts. It is what makes an edge look like an edge rather than a
+                    // rounded rectangle.
+                    highlight = { pillHighlight.value.copy(alpha = 0.75f) },
+                    // A tinted sheet over the refraction, so the strip keeps a colour of its own
+                    // and stays legible over whatever happens to be scrolling behind it.
                     onDrawSurface = { drawRect(containerColor) },
-                ),
+                )
+                // Rearranging and switching panels would both answer a horizontal drag; while
+                // rearranging, the slots own the gesture.
+                .then(if (editing) Modifier else drag.modifier)
+                .height(64.dp)
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             PanelFloatingNavigationBar(
                 panels = panels,
                 current = current,
                 editing = editing,
-                onSelect = {
-                    currentIndex = items.indexOfFirst { it.route == current }.coerceAtLeast(0)
-                    onSelect(it)
+                onSelect = { route ->
+                    currentIndex = items.indexOfFirst { it.route == route }.coerceAtLeast(0)
+                    onSelect(route)
                 },
                 onEdit = onEdit,
                 onToggleHidden = onToggleHidden,
@@ -199,11 +236,10 @@ fun PanelGlassBar(
         if (!editing) {
             Row(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .clearAndSetSemantics {}
                     .alpha(0f)
                     .layerBackdrop(tabsBackdrop)
-                    .height(56.dp)
-                    .padding(horizontal = 4.dp)
                     .drawBackdrop(
                         backdrop = backdrop,
                         shape = { pillShape },
@@ -214,7 +250,9 @@ fun PanelGlassBar(
                             lens(refractionHeight = lensPx, refractionAmount = lensPx)
                         },
                         onDrawSurface = { drawRect(containerColor) },
-                    ),
+                    )
+                    .height(56.dp)
+                    .padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 content = tabsContent,
             )
@@ -245,10 +283,12 @@ fun PanelGlassBar(
                                     chromaticAberration = 0.5f,
                                 )
                             },
+                            highlight = { pillHighlight.value.copy(alpha = drag.pressProgress) },
                             onDrawSurface = {
                                 val progress = drag.pressProgress
                                 drawRect(
-                                    color = if (isDark) Color.White.copy(alpha = 0.1f) else Color.Black.copy(alpha = 0.1f),
+                                    color = if (isDark) Color.White.copy(alpha = 0.1f)
+                                    else Color.Black.copy(alpha = 0.1f),
                                     alpha = 1f - progress,
                                 )
                                 drawRect(Color.Black.copy(alpha = 0.03f * progress))
