@@ -76,6 +76,63 @@ import kotlin.math.sign
  * because the tabs are drawn twice — once to look at, once into the backdrop the pill samples —
  * and the recording pass is the one that has to carry the scale.
  */
+
+/**
+ * Knobs for the pill's geometry, live while the preview is on screen.
+ *
+ * Not a settings surface: these exist because the pill sits over two independently drawn
+ * passes of the same tabs, and whether it lines up depends on numbers only the eye can
+ * settle. Everything here is in dp and applied as a plain offset or size, so a value that
+ * looks right is the value to keep.
+ */
+
+/**
+ * Sliders over the glass bar, shown only while [showTuning] is on.
+ *
+ * The pill is drawn over two independently laid out passes of the same tabs, and whether the
+ * refracted image lands where the tab is depends on numbers that change with screen density,
+ * font scale and tab count. Reading them off a screenshot has not worked, so they are tuned
+ * against the running bar instead.
+ */
+@Composable
+fun GlassPillTuningPanel(
+    tuning: GlassPillTuning,
+    onTuningChange: (GlassPillTuning) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        androidx.compose.material3.Text("胶囊调试", fontSize = 16.sp)
+        TuningSlider("高度", tuning.heightDp, 24f..72f) { onTuningChange(tuning.copy(heightDp = it)) }
+        TuningSlider("宽度内缩", tuning.widthInsetDp, 0f..32f) { onTuningChange(tuning.copy(widthInsetDp = it)) }
+        TuningSlider("左右偏移", tuning.offsetXDp, -24f..24f) { onTuningChange(tuning.copy(offsetXDp = it)) }
+        TuningSlider("上下偏移", tuning.offsetYDp, -24f..24f) { onTuningChange(tuning.copy(offsetYDp = it)) }
+        TuningSlider("折射", tuning.refractionDp, 0f..32f) { onTuningChange(tuning.copy(refractionDp = it)) }
+        androidx.compose.material3.Button(onClick = { onTuningChange(GlassPillTuning()) }) {
+            androidx.compose.material3.Text("重置")
+        }
+    }
+}
+
+@Composable
+private fun TuningSlider(
+    label: String,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    onValueChange: (Float) -> Unit,
+) {
+    Column {
+        androidx.compose.material3.Text("$label ${"%.0f".format(value)}dp", fontSize = 12.sp)
+        androidx.compose.material3.Slider(value = value, onValueChange = onValueChange, valueRange = range)
+    }
+}
+
+data class GlassPillTuning(
+    val heightDp: Float = 40f,
+    val widthInsetDp: Float = 8f,
+    val offsetXDp: Float = 0f,
+    val offsetYDp: Float = 0f,
+    val refractionDp: Float = 12f,
+)
 private val LocalIosTabScale = staticCompositionLocalOf { { 1f } }
 
 /**
@@ -105,6 +162,7 @@ fun PanelGlassBar(
     onSelect: (androidx.navigation3.runtime.NavKey) -> Unit,
     backdrop: Backdrop,
     modifier: Modifier = Modifier,
+    tuning: GlassPillTuning = GlassPillTuning(),
 ) {
     val items = panels.visible
     val tabsCount = items.size
@@ -382,7 +440,12 @@ fun PanelGlassBar(
                         // laid out from the top centres at 24dp and samples the tabs from 8dp
                         // above their middle, which is what put the refracted icons high in the
                         // glass. 8dp top and bottom puts the pill's centre at 32dp too.
-                        .padding(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 12.dp)
+                        .padding(
+                            start = 8.dp + tuning.offsetXDp.dp,
+                            end = 8.dp - tuning.offsetXDp.dp,
+                            top = 12.dp + tuning.offsetYDp.dp,
+                            bottom = 12.dp - tuning.offsetYDp.dp,
+                        )
                         .graphicsLayer {
                             val progressOffset = dampedDrag.value * tabWidthPx
                             translationX =
@@ -399,8 +462,8 @@ fun PanelGlassBar(
                             effects = {
                                 val progress = dampedDrag.pressProgress
                                 lens(
-                                    refractionHeight = with(density) { 10.dp.toPx() } * progress,
-                                    refractionAmount = with(density) { 14.dp.toPx() } * progress,
+                                    refractionHeight = with(density) { tuning.refractionDp.dp.toPx() } * progress,
+                                    refractionAmount = with(density) { (tuning.refractionDp + 4f).dp.toPx() } * progress,
                                     depthEffect = true,
                                     chromaticAberration = 0.5f,
                                 )
@@ -430,8 +493,12 @@ fun PanelGlassBar(
                                 alpha = dampedDrag.pressProgress,
                             )
                         }
-                        .height(40.dp)
-                        .width(with(density) { tabWidthPx.toDp() - 8.dp }),
+                        .height(tuning.heightDp.dp)
+                        .width(
+                            with(density) {
+                                (tabWidthPx - with(density) { tuning.widthInsetDp.dp.toPx() }).toDp()
+                            },
+                        ),
                 )
             }
         }
