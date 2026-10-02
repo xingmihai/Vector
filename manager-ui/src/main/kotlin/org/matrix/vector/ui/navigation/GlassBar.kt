@@ -250,7 +250,7 @@ fun PanelGlassBar(
                         scaleX = s
                         scaleY = s
                     },
-                verticalArrangement = Arrangement.spacedBy(1.dp, CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
                 horizontalAlignment = CenterHorizontally,
             ) {
                 androidx.compose.material3.Icon(
