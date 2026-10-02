@@ -1,0 +1,30 @@
+name: exp
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  exp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Fetch release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download canary-3303 --repo xingmihai/Vector --pattern "Vector-vcanary-3293-3303-Release.zip"
+          ls -la
+      - name: Split and commit
+        run: |
+          mkdir -p parts
+          split -b 4000000 Vector-vcanary-3293-3303-Release.zip parts/p
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B expout
+          git add -f parts
+          git commit -m "exp" || echo none
+          git push -f origin expout
