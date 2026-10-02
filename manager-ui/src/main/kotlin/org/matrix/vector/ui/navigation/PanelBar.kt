@@ -6,6 +6,7 @@
 package org.matrix.vector.ui.navigation
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -57,6 +58,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import org.matrix.vector.ui.R
@@ -65,6 +67,9 @@ import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
 
 /** What is left of a hidden panel in edit mode: Material's disabled alpha, saying the same. */
+/** How far the iOS-style pill lifts off the strip behind it. */
+private const val PILL_ALPHA = 0.16f
+
 private const val HIDDEN_ALPHA = 0.38f
 
 /** How much the dragged item grows, so a finger is visibly carrying it rather than pushing it. */
@@ -193,6 +198,7 @@ fun PanelFloatingNavigationBar(
     onEdit: () -> Unit,
     onToggleHidden: (key: String, hidden: Boolean) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
+    iosStyle: Boolean = false,
 ) {
     val items = if (editing) panels.all else panels.visible
     val drag = remember(items.size, true) { PanelDrag(items.size) }
@@ -213,6 +219,12 @@ fun PanelFloatingNavigationBar(
             onToggleHidden = { hidden -> onToggleHidden(destination.key, hidden) },
             onMove = onMove,
             fillSlot = false,
+            // The iOS arrangement marks the current tab with a pill behind its icon rather than
+            // only by tinting that icon, which is the part of the look that survives without the
+            // library's blur module. Nothing marks a tab while rearranging: the badge already says
+            // which ones are here and which are not, and a highlight on top of that reads as two
+            // answers to one question.
+            pillIndicator = iosStyle && !editing,
         ) { label, selected, onClick, modifier ->
             FloatingNavigationBarItem(
                 selected = selected,
@@ -284,6 +296,7 @@ private fun PanelSlot(
     onMove: (from: Int, to: Int) -> Unit,
     slotModifier: Modifier = Modifier,
     fillSlot: Boolean = horizontal,
+    pillIndicator: Boolean = false,
     content: @Composable (label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier) -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -401,6 +414,17 @@ private fun PanelSlot(
                     }
                 }
             }
+        if (pillIndicator && selected) {
+            Box(
+                // Sized off the slot, which is sized off the item: the pill is as wide as the
+                // icon it sits behind and no wider, so it reads as marking that tab rather than
+                // as a second bar inside the first.
+                Modifier
+                    .matchParentSize()
+                    .clip(CircleShape)
+                    .background(MiuixTheme.colorScheme.onSurface.copy(alpha = PILL_ALPHA))
+            )
+        }
         val itemModifier =
             // The slot's width, and only its width. The bar spaces its slots by weight, so the
             // width is settled before the item is measured; the height is the item's own. Filling
