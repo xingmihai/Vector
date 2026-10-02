@@ -176,15 +176,22 @@ jobs:
       - name: Dump build errors
         if: failure()
         run: |
-          set -uo pipefail
-          { grep -E '^(e: |w: )' build.log | head -60; echo '---WHAT WENT WRONG---'; grep -n -A 25 'What went wrong' build.log | head -80; echo '---TAIL---'; tail -40 build.log; } > dbg.txt || true
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -B dbg
-          cp dbg.txt dbg-out.txt
-          git add -f dbg-out.txt
-          git commit -m "build debug output" || echo nothing
-          git push -f origin dbg
+          echo "--- e/w ---" > dbg.txt || true
+          grep -E '^(e: |w: )' build.log | head -60 >> dbg.txt || echo "(no e:/w: lines)" >> dbg.txt
+          echo "--- WHAT WENT WRONG ---" >> dbg.txt || true
+          grep -n -A 30 'What went wrong' build.log | head -100 >> dbg.txt || true
+          echo "--- FAILED TASKS ---" >> dbg.txt || true
+          grep -nE 'Task .* FAILED|Execution failed for task' build.log | head -40 >> dbg.txt || true
+          echo "--- TAIL ---" >> dbg.txt || true
+          tail -60 build.log >> dbg.txt || true
+          echo "--- dbg.txt size ---" >> dbg.txt || true
+          wc -c dbg.txt || true
+          git config user.name "github-actions[bot]" || true
+          git config user.email "github-actions[bot]@users.noreply.github.com" || true
+          git checkout -B dbg 2>&1 | head -3 || true
+          git commit --allow-empty -F dbg.txt -m "dbg: build output" 2>&1 | head -3 || true
+          git push -f origin HEAD:refs/heads/dbg 2>&1 | head -5 || true
+          echo "push attempted"
 
       - name: Prepare artifact
         if: success()
