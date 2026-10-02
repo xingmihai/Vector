@@ -366,8 +366,11 @@ fun PanelGlassBar(
                             onDrawSurface = { drawRect(containerColor) },
                         )
                         .then(interactiveHighlight.modifier)
-                        .height(56.dp)
-                        .padding(horizontal = 4.dp),
+                        // Same height and same padding as the visible row: the pill refracts
+                        // this pass, so any difference in where it sits is a difference in
+                        // what the pill shows. 4dp shorter and the tabs ride high in the glass.
+                        .height(64.dp)
+                        .padding(4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     content = tabsContent,
                 )
@@ -425,7 +428,7 @@ fun PanelGlassBar(
                                 alpha = dampedDrag.pressProgress,
                             )
                         }
-                        .height(56.dp)
+                        .height(48.dp)
                         .width(tabWidthDp),
                 )
             }
