@@ -129,7 +129,7 @@ private const val GRAVITY_ANGLE_STEP_RAD = (3.0 * PI / 180.0).toFloat()
  * would recompose the whole caller on every tick instead of just redrawing.
  */
 @Composable
-internal fun rememberQuantizedGravityAngle(): State<Float> {
+public fun rememberQuantizedGravityAngle(): State<Float> {
     val tiltState = rememberDeviceTilt()
     return remember(tiltState) {
         derivedStateOf {
@@ -151,7 +151,7 @@ internal fun rememberQuantizedGravityAngle(): State<Float> {
  * phone the way a real edge does rather than being painted on.
  */
 @Composable
-internal fun rememberGravityRotatedHighlight(
+public fun rememberGravityRotatedHighlight(
     base: Highlight,
     extraDegrees: Float,
 ): State<Highlight> {
@@ -177,7 +177,7 @@ internal fun rememberGravityRotatedHighlight(
 }
 
 /** The rim the strip and the indicator are lit with. */
-internal val IosIndicatorSpecular: Highlight get() = iosIndicatorSpecular
+public val IosIndicatorSpecular: Highlight get() = iosIndicatorSpecular
 
 // Copyright 2026, compose-miuix-ui contributors
 // SPDX-License-Identifier: Apache-2.0
