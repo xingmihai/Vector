@@ -219,6 +219,7 @@ fun VectorApp() {
                                     onEdit = { navigator.editingPanels = true },
                                     onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
                                     onMove = { from, to -> navigator.movePanel(from, to) },
+                                    iosStyle = floatingBarStyle == 1,
                                 )
                             }
                         }
@@ -240,7 +241,12 @@ fun VectorApp() {
                             }
                             FloatingNavigationBar(
                                 // A capsule has no alignment of its own; a corner radius this large
-                                // is what makes the strip one.
+                                // is what makes the strip one — and it is what the default already
+                                // is at this height, so the radius is not where the two styles
+                                // differ. The height and the pill behind the current tab are.
+                                modifier =
+                                    if (floatingBarStyle == 1) Modifier.height(IosBarHeight)
+                                    else Modifier,
                                 cornerRadius =
                                     if (floatingBarStyle == 1) 100.dp
                                     else FloatingToolbarDefaults.CornerRadius,
@@ -393,3 +399,6 @@ private fun EntryProviderScope<NavKey>.registerRoutes(navigator: Navigator) {
     }
     entry<Web> { route -> WebScreen(url = route.url, onNavigateBack = { navigator.back() }) }
 }
+
+/** The strip in the iOS arrangement is taller than the default one. */
+private val IosBarHeight = 64.dp
