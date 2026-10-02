@@ -220,7 +220,6 @@ fun VectorApp() {
                                     onEdit = { navigator.editingPanels = true },
                                     onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
                                     onMove = { from, to -> navigator.movePanel(from, to) },
-                                    iosStyle = floatingBarStyle == 1,
                                 )
                             }
                         }
@@ -266,6 +265,7 @@ fun VectorApp() {
                                     onEdit = { navigator.editingPanels = true },
                                     onToggleHidden = { key, hidden -> navigator.setPanelHidden(key, hidden) },
                                     onMove = { from, to -> navigator.movePanel(from, to) },
+                                    iosStyle = floatingBarStyle == 1,
                                 )
                             }
                         }
